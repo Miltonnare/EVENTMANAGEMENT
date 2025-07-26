@@ -40,3 +40,42 @@ const register=async (req,res)=>{
     }
 };
 
+const login=async (req,res)=>{
+    const {email,password}=req.body
+
+    if(!email||!password){
+        return res.status(400).json({message:'Email and Password are required'});
+    }
+
+    try {
+        const user=await User.findOne({email});
+
+        if(!user||!(await user.matchPassword(password))){
+            return res.status(400).json({message:'Invalid Credentials'});
+        }
+
+        res.status(200).json(
+
+        )
+
+        
+    } catch (error) {
+        res.status(500).json({message:'server error', error:error.message});
+    }
+};
+
+const getProfile=async (req,res)=>{
+    try {
+        const user=await User.findById(req.user.id).select('-password');
+
+        if(!user){
+            return res.status(400).json({message:'User not found '});
+        }
+        
+    } catch (error) {
+        res.status(500).json({message:'server error',error:error.message});
+        
+    }
+};
+
+module.exports={register,login,getProfile};
