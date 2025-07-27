@@ -28,8 +28,50 @@ const getEvents=async (req,res)=>{
          res.status(200).json({success:true,events})
         
     } catch (error) {
-        res.status(500).json({success:false,error:error.message});
+        res.status(500).json({success:false,Error:error.message});
         
     }
 };
+
+const getEventsById=async(req,res)=>{
+    try {
+        const event=await Events.findById(req.params.id).populate('organizer','name email');
+        if(!event) return res.status(404).json({success:false,error:'Event Not Found'});
+
+        res.status(200).json({success:true,event});
+    } catch (error) {
+        res.status(500).json({success:false,Error:error.message});
+        
+    }
+};
+
+const updateEvent = async (req, res) => {
+    try {
+        const { title, description, date, location, capacity } = req.body;
+        // Find the event first
+        const event = await Events.findById(req.params.id);
+        if (!event) {
+            return res.status(404).json({ success: false, error: 'Event Not Found' });
+        }
+
+        // Check if the user is the organizer
+        if (String(event.organizer) !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, error: 'Unauthorized' });
+        }
+
+        // Update the event
+        event.title = title;
+        event.description = description;
+        event.date = date;
+        event.location = location;
+        event.capacity = capacity;
+        await event.save();
+
+        await event.populate('organizer', 'name email');
+        res.status(200).json({ success: true, event });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 
