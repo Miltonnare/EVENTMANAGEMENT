@@ -46,3 +46,19 @@ const cancelRegistration=async (req,res)=>{
         
     }
 };
+
+const viewAttendees=async (req,res)=>{
+    try {
+        const event=await Event.findById(req.params.eventId).populate('attendees','name email');
+        
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    if (event.organizer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to view attendees' });
+    }
+
+    res.status(200).json({ attendees: event.attendees });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
