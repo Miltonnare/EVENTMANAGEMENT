@@ -26,3 +26,23 @@ const registerForEvent=async(req,res)=>{
         
     }
 };
+
+const cancelRegistration=async (req,res)=>{
+    try {
+        const event=await Event.findById(req.params.eventId);
+
+        if(!event) return res.status(404).json({message:'Event not found'});
+
+        event.attendees=event.attendees.filter(attendee=>{
+            attendee.toString()!==req.user._id.toString()
+        });
+
+        await event.save();
+
+        res.status(200).json({message:'Registration cancelled'});
+        
+    } catch (error) {
+        res.status(500).json({message:'Server Error',Error:error.message});
+        
+    }
+};
