@@ -24,7 +24,7 @@ const createEvent=async (req,res)=>{
 
 const getEvents=async (req,res)=>{
     try {
-         const events = await Event.find().populate('organizer', 'name email');
+         const events = await Events.find().populate('organizer', 'name email');
          res.status(200).json({success:true,events})
         
     } catch (error) {
@@ -76,7 +76,7 @@ const updateEvent = async (req, res) => {
 
 const deleteEvent=async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Events.findById(req.params.id);
     if (!event) return res.status(404).json({ success: false, error: 'Event not found' });
 
     if (String(event.organizer) !== req.user._id.toString()) {
