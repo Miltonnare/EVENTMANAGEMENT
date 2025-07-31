@@ -11,9 +11,17 @@ const Navbar=()=>{
 
             </div>
             <div className='space-x-6 text-sm font-medium'>
+                <a href='/' className='hover:text-blue-600'> Home</a>
+                <a href='#events' className='hover:text-blue-600'> Events</a>
+                <a href='/register' className='hover:text-blue-600'> Register</a>
+                <a href='/login' className='hover:text-blue-600'> Login</a>
 
             </div>
 
         </nav>
     )
+
+
 }
+
+export default Navbar;
