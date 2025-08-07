@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import axios from 'axios';
 
 import Navbar from '../components/Navbar';
+import EventCard from '../components/EventCard';
 
 const LandingPage = () => {
     const [eventCount, setEventCount] = useState(0);
-     const [events, setEvents] = useState([]);
+    const [events, setEvents] = useState([]);
 
     useEffect(() => {
         const fetchEventCount = async () => {
@@ -47,21 +48,13 @@ const LandingPage = () => {
                 ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {events.map(event => (
-                            <div key={event._id} className="bg-white p-4 rounded shadow">
-                                <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
-                                <p className="text-gray-700">{event.description}</p>
-                                <p className="text-sm mt-2 text-gray-500">Date: {new Date(event.date).toDateString()}</p>
-                                <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    Register
-                                </button>
-                            </div>
+                            <EventCard key={event._id} event={event} />
                         ))}
                     </div>
                 )}
             </section>
             </main>
 
-           
             <footer className="bg-gray-100 py-4 text-center text-gray-500 text-sm">
                 &copy; {new Date().getFullYear()} EventSphere. All Rights Reserved
             </footer>
