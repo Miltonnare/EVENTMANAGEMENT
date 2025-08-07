@@ -36,7 +36,21 @@ const LandingPage = () => {
                 <div className="text-xl font-medium text-gray-800">
                     Total Events: <span className="text-blue-600 font-bold">{eventCount}</span>
                 </div>
+
+                <section id="events"  className="bg-gray-50 px-6 py-10">
+                    <h2 className="text-3xl font-bold text-center mb-6">Upcoming Events</h2>
+                    {
+                        events.length===0 ?(
+                            <p className="text-center text-gray-500">No Events Uploaded Yet</p>
+                        ):(
+                            
+                        )
+                    }
+
+                </section>
             </main>
+
+           
             <footer className="bg-gray-100 py-4 text-center text-gray-500 text-sm">
                 &copy; {new Date().getFullYear()} EventSphere. All Rights Reserved
             </footer>
