@@ -11,6 +11,8 @@ const OrganizerDashboard = ({ user }) => {
         date: "",
         location: ""
     });
+    const [attendees, setAttendees] = useState([]);
+    const [selectedEventId, setSelectedEventId] = useState(null);
 
     useEffect(() => {
         fetchMyEvents();
@@ -58,6 +60,24 @@ const OrganizerDashboard = ({ user }) => {
         } catch (error) {
             console.error("Error deleting event:", error);
         }
+    };
+
+    const handleViewAttendees = async (eventId) => {
+        try {
+            setSelectedEventId(eventId);
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`/api/events/${eventId}/attendees`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAttendees(res.data.attendees || []);
+        } catch (error) {
+            console.error("Error fetching attendees:", error);
+        }
+    };
+
+    const closeAttendeeList = () => {
+        setSelectedEventId(null);
+        setAttendees([]);
     };
 
     if (loading) return <p>Loading your events...</p>;
@@ -138,7 +158,34 @@ const OrganizerDashboard = ({ user }) => {
                                 >
                                     Delete
                                 </button>
+                                <button
+                                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    onClick={() => handleViewAttendees(event._id)}
+                                >
+                                    View Attendees
+                                </button>
                             </div>
+
+                            {selectedEventId === event._id && (
+                                <div className="mt-4 border-t pt-2">
+                                    <h4 className="font-semibold mb-2">Attendees:</h4>
+                                    {attendees.length > 0 ? (
+                                        <ul className="list-disc list-inside text-gray-700">
+                                            {attendees.map(a => (
+                                                <li key={a._id}>{a.name} ({a.email})</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p>No attendees yet.</p>
+                                    )}
+                                    <button
+                                        onClick={closeAttendeeList}
+                                        className="mt-2 px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
