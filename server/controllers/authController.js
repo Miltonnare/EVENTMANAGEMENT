@@ -12,18 +12,18 @@ const generateToken = (user) => {
 const register=async (req,res)=>{
     const {name,email,password,phone,role}=req.body;
 
-    if(!name||!email||phone||password){
+    if(!name||!email||!phone||!password){
         return res.status(400).json({message:'All fields are required'});
 
     }
     try {
         const existingUser=await User.findOne({email});
         if(existingUser){
-            res.status(409).json({message:'Email already used'});
+            return res.status(409).json({message:'Email already used'});
         }
 
         const user=await User.create({name,email,phone,password,role});
-        res.status(201).json({
+        return res.status(201).json({
             message:'User created succesfully',
             token:generateToken(user),
             user:{
@@ -35,7 +35,7 @@ const register=async (req,res)=>{
         });
         
     } catch (error) {
-        res.status(500).json({message:'server error', error:error.message})
+        return res.status(500).json({message:'server error', error:error.message})
         
     }
 };
@@ -54,13 +54,19 @@ const login=async (req,res)=>{
             return res.status(400).json({message:'Invalid Credentials'});
         }
 
-        res.status(200).json(
-
-        )
-
+        return res.status(200).json({
+            message: 'Login successful',
+            token: generateToken(user),
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            }
+        });
         
     } catch (error) {
-        res.status(500).json({message:'server error', error:error.message});
+        return res.status(500).json({message:'server error', error:error.message});
     }
 };
 
@@ -71,9 +77,10 @@ const getProfile=async (req,res)=>{
         if(!user){
             return res.status(400).json({message:'User not found '});
         }
+        return res.status(200).json(user);
         
     } catch (error) {
-        res.status(500).json({message:'server error',error:error.message});
+        return res.status(500).json({message:'server error',error:error.message});
         
     }
 };

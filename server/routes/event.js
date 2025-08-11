@@ -3,16 +3,20 @@ const express=require('express');
 
 const router=express.Router();
 
-const {createEvent,updateEvent,deleteEvent,getEvents,getEventsById}=require('../controllers/eventController')
+const {createEvent,updateEvent,deleteEvent,getEvents,getEventsById,getMyEvents,getRegisteredEvents,getEventAttendees}=require('../controllers/eventController')
 
-const {protect}=require('../middlewares/authMiddleware');
+const protect=require('../middlewares/authMiddleware');
 
 router.get('/',getEvents);
+
+router.get('/mine/me', protect, getMyEvents);
+router.get('/registered/me', protect, getRegisteredEvents);
+router.get('/:eventId/attendees', protect, getEventAttendees);
 
 router.get('/:id',getEventsById);
 
 router.post('/',protect,createEvent);
-router.put('/',protect,updateEvent);
-router.delete('/', protect,deleteEvent);
+router.put('/:id',protect,updateEvent);
+router.delete('/:id', protect,deleteEvent);
 
 module.exports=router;

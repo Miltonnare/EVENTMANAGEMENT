@@ -45,6 +45,37 @@ const getEventsById=async(req,res)=>{
     }
 };
 
+const getMyEvents = async (req, res) => {
+    try {
+        const events = await Events.find({ organizer: req.user._id });
+        return res.status(200).json(events);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const getRegisteredEvents = async (req, res) => {
+    try {
+        const events = await Events.find({ attendees: req.user._id });
+        return res.status(200).json(events);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const getEventAttendees = async (req, res) => {
+    try {
+        const event = await Events.findById(req.params.eventId).populate('attendees', 'name email');
+        if (!event) return res.status(404).json({ message: 'Event not found' });
+        if (event.organizer.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized to view attendees' });
+        }
+        return res.status(200).json({ attendees: event.attendees });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 const updateEvent = async (req, res) => {
     try {
         const { title, description, date, location, capacity } = req.body;
@@ -88,5 +119,16 @@ const deleteEvent=async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+};
+
+module.exports = {
+  createEvent,
+  getEvents,
+  getEventsById,
+  getMyEvents,
+  getRegisteredEvents,
+  getEventAttendees,
+  updateEvent,
+  deleteEvent,
 };
 

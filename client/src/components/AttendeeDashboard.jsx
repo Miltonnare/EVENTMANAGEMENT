@@ -1,32 +1,49 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const AttendeeDashboard = ({ user }) => {
+const AttendeeDashboard = () => {
     const [registeredEvents, setRegisteredEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchRegisteredEvents = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const res = await axios.get("/api/users/me/registrations", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setRegisteredEvents(res.data || []);
-            } catch (error) {
-                console.error("Error fetching registered events:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchRegisteredEvents();
     }, []);
+
+    const fetchRegisteredEvents = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get("/api/events/registered/me", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setRegisteredEvents(res.data || []);
+        } catch (error) {
+            console.error("Error fetching registered events:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const cancelRegistration = async (eventId) => {
+        if (!window.confirm("Are you sure you want to cancel this registration?")) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            await axios.delete(`/api/eventRegistration/${eventId}/cancel`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Refresh the list after cancellation
+            setRegisteredEvents(prev => prev.filter(e => e._id !== eventId));
+        } catch (error) {
+            console.error("Error canceling registration:", error);
+        }
+    };
 
     if (loading) return <p>Loading your registered events...</p>;
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-4">Your Registered Events</h2>
+            <h2 className="text-2xl font-bold mb-4">My Registered Events</h2>
+
             {registeredEvents.length === 0 ? (
                 <p>You haven't registered for any events yet.</p>
             ) : (
@@ -36,11 +53,12 @@ const AttendeeDashboard = ({ user }) => {
                             <h3 className="text-xl font-semibold">{event.title}</h3>
                             <p className="text-gray-600">{event.description}</p>
                             <p className="text-sm text-gray-500 mt-2">
-                                {new Date(event.date).toDateString()}
+                                {new Date(event.date).toDateString()} @ {event.location}
                             </p>
+
                             <button
                                 className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                                onClick={() => console.log("Cancel registration for", event._id)}
+                                onClick={() => cancelRegistration(event._id)}
                             >
                                 Cancel Registration
                             </button>

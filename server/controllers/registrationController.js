@@ -3,16 +3,16 @@ const User=require('../models/User');
 
 const registerForEvent=async(req,res)=>{
     try {
-        const event=await Event.findById(req.params.id);
+        const event=await Event.findById(req.params.eventId);
 
         if(!event){
             return res.status(404).json({message:'Event not found'});
         }
-        if(event.attendees.includes(req.user.id)){
+        if(event.attendees.some(att => att.toString() === req.user._id.toString())){
                 return res.status(400).json({message:'Already registered for this Event'});
             }
 
-            if(event.attendees.length>event.capacity){
+            if(event.capacity && event.attendees.length >= Number(event.capacity)){
                return res.status(400).json({message:'Event is Full'})
             }
 
@@ -33,9 +33,7 @@ const cancelRegistration=async (req,res)=>{
 
         if(!event) return res.status(404).json({message:'Event not found'});
 
-        event.attendees=event.attendees.filter(attendee=>{
-            attendee.toString()!==req.user._id.toString()
-        });
+        event.attendees=event.attendees.filter(attendee => attendee.toString() !== req.user._id.toString());
 
         await event.save();
 

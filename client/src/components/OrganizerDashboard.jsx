@@ -21,7 +21,7 @@ const OrganizerDashboard = ({ user }) => {
     const fetchMyEvents = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get("/api/events/mine", {
+            const res = await axios.get("/api/events/mine/me", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMyEvents(res.data || []);

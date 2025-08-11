@@ -22,9 +22,9 @@ const eventsSchema= new mongoose.Schema({
         required:[true,'Location is required']
     },
     capacity:{
-        type:String,
-        required:[false,'Capacity'],
-        min:[1,'Atleast one member']
+        type:Number,
+        required:false,
+        min:[1,'At least one attendee']
     },
     organizer:{
         type:mongoose.Schema.Types.ObjectId,

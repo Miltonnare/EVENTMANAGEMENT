@@ -1,7 +1,7 @@
-const express=reqiure('express');
+const express=require('express');
 const router=express.Router();
 
-const {protect}=require('../middlewares/authMiddleware');
+const protect=require('../middlewares/authMiddleware');
 const {
     registerForEvent,cancelRegistration,viewAttendees
 }=require('../controllers/registrationController');
