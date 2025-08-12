@@ -1,0 +1,141 @@
+import React, { useState } from 'react';
+
+const NewsletterSignup = () => {
+  const [email, setEmail] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Simulate API call - replace with actual newsletter signup endpoint
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Here you would typically make an API call to your backend
+      // await axios.post('/api/newsletter/subscribe', { email });
+      
+      setIsSubscribed(true);
+      setEmail('');
+    } catch (error) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isSubscribed) {
+    return (
+      <section className="py-20 px-6 bg-gradient-to-r from-green-500 to-green-600">
+        <div className="max-w-4xl mx-auto text-center text-white">
+          <div className="text-6xl mb-4">🎉</div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Welcome to EventSphere!
+          </h2>
+          <p className="text-xl mb-6">
+            You've successfully subscribed to our newsletter. We'll keep you updated with the latest events and exclusive offers.
+          </p>
+          <button
+            onClick={() => setIsSubscribed(false)}
+            className="bg-white text-green-600 px-6 py-3 rounded-lg hover:bg-green-50 transition duration-200 font-semibold"
+          >
+            Subscribe Another Email
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-20 px-6 bg-gradient-to-r from-blue-600 to-purple-700">
+      <div className="max-w-4xl mx-auto text-center text-white">
+        <div className="text-6xl mb-4">📧</div>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Stay Updated with EventSphere
+        </h2>
+        <p className="text-xl mb-8 text-blue-100">
+          Get notified about the latest events, exclusive offers, and insider tips delivered straight to your inbox.
+        </p>
+        
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                className="w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                disabled={isLoading}
+              />
+              {error && (
+                <p className="text-red-200 text-sm mt-2 text-left">{error}</p>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  Subscribing...
+                </div>
+              ) : (
+                'Subscribe'
+              )}
+            </button>
+          </div>
+        </form>
+        
+        <div className="mt-8 text-blue-100 text-sm">
+          <p>Join 10,000+ event enthusiasts who get our weekly updates</p>
+          <p className="mt-2">No spam, unsubscribe at any time</p>
+        </div>
+        
+        <div className="mt-8 flex justify-center items-center space-x-6 text-blue-100">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Weekly Updates</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Exclusive Offers</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>No Spam</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default NewsletterSignup;
