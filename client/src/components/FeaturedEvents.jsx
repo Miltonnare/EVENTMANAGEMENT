@@ -32,10 +32,10 @@ const FeaturedEvents = () => {
 
   if (loading) {
     return (
-      <section className="py-20 px-6 bg-white">
+      <section className="py-20 px-6 bg-gray-100">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
               Featured Upcoming Events
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -43,7 +43,7 @@ const FeaturedEvents = () => {
             </p>
           </div>
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
           </div>
         </div>
       </section>
@@ -51,10 +51,10 @@ const FeaturedEvents = () => {
   }
 
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-20 px-6 bg-gray-100">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             Featured Upcoming Events
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -65,13 +65,13 @@ const FeaturedEvents = () => {
         {events.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📅</div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Upcoming Events</h3>
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">No Upcoming Events</h3>
             <p className="text-gray-600 mb-6">
               Check back soon for exciting new events, or be the first to create one!
             </p>
             <Link 
               to="/register" 
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+              className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition duration-200"
             >
               Create Your First Event
             </Link>
@@ -89,7 +89,7 @@ const FeaturedEvents = () => {
             <div className="text-center">
               <Link 
                 to="/events" 
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold"
+                className="inline-flex items-center gap-2 bg-gray-700 text-white px-8 py-4 rounded-lg hover:bg-gray-800 transition duration-200 font-semibold"
               >
                 View All Events
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

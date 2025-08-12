@@ -41,10 +41,10 @@ const TestimonialsSection = () => {
   };
 
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-20 px-6 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             What Our Users Say
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -57,12 +57,12 @@ const TestimonialsSection = () => {
           {testimonials.map((testimonial, index) => (
             <div 
               key={index}
-              className="bg-gray-50 p-8 rounded-xl border border-gray-200 hover:shadow-lg transition duration-300"
+              className="bg-white/80 backdrop-blur-sm p-8 rounded-xl border border-gray-200/50 hover:shadow-lg transition duration-300"
             >
               <div className="flex items-center mb-4">
                 <div className="text-3xl mr-4">{testimonial.avatar}</div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
+                  <h4 className="font-semibold text-gray-800">{testimonial.name}</h4>
                   <p className="text-sm text-gray-600">{testimonial.role} at {testimonial.company}</p>
                 </div>
               </div>
@@ -77,17 +77,17 @@ const TestimonialsSection = () => {
         </div>
         
         <div className="text-center mt-12">
-          <div className="inline-flex items-center space-x-8 bg-blue-50 px-8 py-4 rounded-full">
+          <div className="inline-flex items-center space-x-8 bg-gray-200/50 backdrop-blur-sm px-8 py-4 rounded-full border border-gray-300/30">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">4.9/5</div>
+              <div className="text-2xl font-bold text-gray-800">4.9/5</div>
               <div className="text-sm text-gray-600">Average Rating</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">98%</div>
+              <div className="text-2xl font-bold text-gray-800">98%</div>
               <div className="text-sm text-gray-600">Satisfaction Rate</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">50K+</div>
+              <div className="text-2xl font-bold text-gray-800">50K+</div>
               <div className="text-sm text-gray-600">Happy Users</div>
             </div>
           </div>

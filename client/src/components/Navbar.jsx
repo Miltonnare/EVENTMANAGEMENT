@@ -18,23 +18,23 @@ const Navbar = () => {
     };
 
     return (
-        <nav className='bg-white shadow-md px-6 py-4 flex justify-between items-center'>
+        <nav className='bg-white/90 backdrop-blur-md shadow-md px-6 py-4 flex justify-between items-center border-b border-gray-200/50'>
            
-            <div className='text-2xl font-bold text-blue-600'>
+            <div className='text-2xl font-bold text-gray-800'>
                 <Link to='/'>EventSphere</Link>
             </div>
             <div className='space-x-6 text-sm font-medium'>
-                <Link to="/" className="hover:text-blue-600">Home</Link>
-                <Link to="/events" className="hover:text-blue-600">Events</Link>
+                <Link to="/" className="hover:text-gray-600 text-gray-700">Home</Link>
+                <Link to="/events" className="hover:text-gray-600 text-gray-700">Events</Link>
                 {isAuthed ? (
                     <>
-                      <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
-                      <button onClick={logout} className="hover:text-blue-600">Logout</button>
+                      <Link to="/dashboard" className="hover:text-gray-600 text-gray-700">Dashboard</Link>
+                      <button onClick={logout} className="hover:text-gray-600 text-gray-700">Logout</button>
                     </>
                 ) : (
                     <>
-                      <Link to="/register" className="hover:text-blue-600">Register</Link>
-                      <Link to="/login" className="hover:text-blue-600">Login</Link>
+                      <Link to="/register" className="hover:text-gray-600 text-gray-700">Register</Link>
+                      <Link to="/login" className="hover:text-gray-600 text-gray-700">Login</Link>
                     </>
                 )}
             </div>

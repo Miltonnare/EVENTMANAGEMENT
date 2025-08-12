@@ -24,15 +24,15 @@ const EventCard = ({ event }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 group">
+    <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden border border-gray-200/50 group">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition duration-200">
+          <h3 className="text-xl font-semibold text-gray-800 group-hover:text-gray-900 transition duration-200">
             {event.title}
           </h3>
           <button
             onClick={() => setShowSharing(!showSharing)}
-            className="text-gray-400 hover:text-blue-600 transition duration-200"
+            className="text-gray-400 hover:text-gray-600 transition duration-200"
             title="Share event"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,18 +62,18 @@ const EventCard = ({ event }) => {
         <div className="flex gap-3">
           <Link
             to={`/events/${event._id}`}
-            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 text-center font-medium"
+            className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition duration-200 text-center font-medium"
           >
             View Details
           </Link>
-          <button className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition duration-200 font-medium">
+          <button className="px-4 py-2 border border-gray-600 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200 font-medium">
             Register
           </button>
         </div>
       </div>
       
       {showSharing && (
-        <div className="border-t border-gray-100 p-4 bg-gray-50">
+        <div className="border-t border-gray-200/50 p-4 bg-gray-100/50">
           <SharingTools eventTitle={event.title} />
         </div>
       )}

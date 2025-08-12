@@ -29,11 +29,11 @@ const LandingPage = () => {
             </main>
 
             {/* Footer */}
-            <footer className="bg-gray-900 text-white py-12 px-6">
+            <footer className="bg-gray-800 text-white py-12 px-6">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-4 gap-8">
                         <div>
-                            <h3 className="text-2xl font-bold text-blue-400 mb-4">EventSphere</h3>
+                            <h3 className="text-2xl font-bold text-gray-300 mb-4">EventSphere</h3>
                             <p className="text-gray-300 mb-4">
                                 The ultimate platform for discovering, creating, and managing amazing events.
                             </p>
