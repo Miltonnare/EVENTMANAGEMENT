@@ -35,11 +35,11 @@ const HeroSection = () => {
             <div className="text-sm">Events Created</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold">50K+</div>
+            <div className="text-3xl font-bold">5K+</div>
             <div className="text-sm">Happy Attendees</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold">100+</div>
+            <div className="text-3xl font-bold">10+</div>
             <div className="text-sm">Cities Covered</div>
           </div>
         </div>

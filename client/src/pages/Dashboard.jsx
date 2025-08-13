@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import AttendeeDashboard from "../components/AttendeeDashboard";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import Navbar from "../components/Navbar";
@@ -17,9 +17,7 @@ const Dashboard = () => {
                     return;
                 }
 
-                const res = await axios.get("/api/auth/profile", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get("/auth/profile");
 
                 setUser(res.data);
             } catch (error) {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
-const OrganizerDashboard = ({ user }) => {
+const OrganizerDashboard = ({  }) => {
     const [myEvents, setMyEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -20,10 +20,7 @@ const OrganizerDashboard = ({ user }) => {
 
     const fetchMyEvents = async () => {
         try {
-            const token = localStorage.getItem("token");
-            const res = await axios.get("/api/events/mine/me", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get("/events/mine/me");
             setMyEvents(res.data || []);
         } catch (error) {
             console.error("Error fetching my events:", error);
@@ -38,10 +35,7 @@ const OrganizerDashboard = ({ user }) => {
 
     const handleCreateEvent = async () => {
         try {
-            const token = localStorage.getItem("token");
-            await axios.post("/api/events", formData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.post("/events", formData);
             setFormData({ title: "", description: "", date: "", location: "" });
             setShowForm(false);
             fetchMyEvents();
@@ -52,10 +46,7 @@ const OrganizerDashboard = ({ user }) => {
 
     const handleDeleteEvent = async (eventId) => {
         try {
-            const token = localStorage.getItem("token");
-            await axios.delete(`/api/events/${eventId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/events/${eventId}`);
             setMyEvents(myEvents.filter(e => e._id !== eventId));
         } catch (error) {
             console.error("Error deleting event:", error);
@@ -65,10 +56,7 @@ const OrganizerDashboard = ({ user }) => {
     const handleViewAttendees = async (eventId) => {
         try {
             setSelectedEventId(eventId);
-            const token = localStorage.getItem("token");
-            const res = await axios.get(`/api/events/${eventId}/attendees`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get(`/events/${eventId}/attendees`);
             setAttendees(res.data.attendees || []);
         } catch (error) {
             console.error("Error fetching attendees:", error);

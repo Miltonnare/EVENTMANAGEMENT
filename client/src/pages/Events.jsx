@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import EventCard from '../components/EventCard';
 
@@ -12,8 +12,8 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('/api/events');
-        setEvents(response.data.events || []);
+        const response = await api.get('/events');
+        setEvents(response.data.events || response.data || []);
       } catch (error) {
         console.error('Error fetching events:', error);
       } finally {

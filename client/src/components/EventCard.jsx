@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SharingTools from './SharingTools';
 
 const EventCard = ({ event }) => {
   const [showSharing, setShowSharing] = useState(false);
+  const navigate = useNavigate();
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -66,7 +67,10 @@ const EventCard = ({ event }) => {
           >
             View Details
           </Link>
-          <button className="px-4 py-2 border border-gray-600 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200 font-medium">
+          <button
+            onClick={() => navigate(`/events/${event._id}`)}
+            className="px-4 py-2 border border-gray-600 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200 font-medium"
+          >
             Register
           </button>
         </div>

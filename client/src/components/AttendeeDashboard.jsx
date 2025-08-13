@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 const AttendeeDashboard = () => {
     const [registeredEvents, setRegisteredEvents] = useState([]);
@@ -11,10 +11,7 @@ const AttendeeDashboard = () => {
 
     const fetchRegisteredEvents = async () => {
         try {
-            const token = localStorage.getItem("token");
-            const res = await axios.get("/api/events/registered/me", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get("/events/registered/me");
             setRegisteredEvents(res.data || []);
         } catch (error) {
             console.error("Error fetching registered events:", error);
@@ -27,10 +24,7 @@ const AttendeeDashboard = () => {
         if (!window.confirm("Are you sure you want to cancel this registration?")) return;
 
         try {
-            const token = localStorage.getItem("token");
-            await axios.delete(`/api/eventRegistration/${eventId}/cancel`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/eventRegistration/${eventId}/cancel`);
             // Refresh the list after cancellation
             setRegisteredEvents(prev => prev.filter(e => e._id !== eventId));
         } catch (error) {
