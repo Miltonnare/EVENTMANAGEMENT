@@ -30,7 +30,7 @@ const OrganizerDashboard = ({  }) => {
                 config.headers.Authorization = `Bearer ${token}`;
             }
             
-            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/mine/me`, config);
+            const res = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/mine/me`, config);
             setMyEvents(res.data || []);
         } catch (error) {
             console.error("Error fetching my events:", error);
@@ -53,7 +53,7 @@ const OrganizerDashboard = ({  }) => {
                 },
             };
             
-            await axios.post(`${import.meta.env.VITE_API_BASE_URL}/events`, formData, config);
+            await axios.post(`${import.meta.env.VITE_API_EVENTS_URL}`, formData, config);
             
             setFormData({ title: "", description: "", date: "", location: "" });
             setShowForm(false);
@@ -73,7 +73,7 @@ const OrganizerDashboard = ({  }) => {
                 },
             };
             
-            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/events/${eventId}`, config);
+            await axios.delete(`${import.meta.env.VITE_API_EVENTS_URL}/${eventId}`, config);
             
             setMyEvents(myEvents.filter(e => e._id !== eventId));
         } catch (error) {
@@ -92,7 +92,7 @@ const OrganizerDashboard = ({  }) => {
                 },
             };
             
-            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/${eventId}/attendees`, config);
+            const res = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/${eventId}/attendees`, config);
             setAttendees(res.data.attendees || []);
         } catch (error) {
             console.error("Error fetching attendees:", error);

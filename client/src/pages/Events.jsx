@@ -22,7 +22,7 @@ const Events = () => {
           config.headers.Authorization = `Bearer ${token}`;
         }
         
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events`, config);
+        const response = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}`, config);
         setEvents(response.data.events || response.data || []);
       } catch (error) {
         console.error('Error fetching events:', error);

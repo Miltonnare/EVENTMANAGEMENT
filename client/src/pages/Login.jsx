@@ -28,7 +28,7 @@ const Login = () => {
         config.headers.Authorization = `Bearer ${token}`;
       }
       
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, form, config);
+      const res = await axios.post(`${import.meta.env.VITE_API_AUTH_URL}/login`, form, config);
       const { token: newToken, user } = res.data;
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(user));

@@ -21,7 +21,7 @@ const AttendeeDashboard = () => {
                 config.headers.Authorization = `Bearer ${token}`;
             }
             
-            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/registered/me`, config);
+            const res = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/registered/me`, config);
             setRegisteredEvents(res.data || []);
         } catch (error) {
             console.error("Error fetching registered events:", error);
@@ -42,7 +42,7 @@ const AttendeeDashboard = () => {
                 },
             };
             
-            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/eventRegistration/${eventId}/cancel`, config);
+            await axios.delete(`${import.meta.env.VITE_API_REGISTRATION_URL}/${eventId}/cancel`, config);
             
             // Refresh the list after cancellation
             setRegisteredEvents(prev => prev.filter(e => e._id !== eventId));

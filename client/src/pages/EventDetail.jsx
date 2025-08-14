@@ -24,12 +24,12 @@ const EventDetail = () => {
           config.headers.Authorization = `Bearer ${token}`;
         }
         
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/${id}`, config);
+        const res = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/${id}`, config);
         setEvent(res.data?.event || null);
 
         if (token) {
           try {
-            const registeredRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/registered/me`, config);
+            const registeredRes = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/registered/me`, config);
             const registeredEvents = registeredRes.data || [];
             setIsRegistered(registeredEvents.some((e) => e._id === id));
           } catch {}
@@ -58,7 +58,7 @@ const EventDetail = () => {
         },
       };
       
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/eventRegistration/${id}/register`, {}, config);
+      await axios.post(`${import.meta.env.VITE_API_REGISTRATION_URL}/${id}/register`, {}, config);
       setIsRegistered(true);
       alert('Registered successfully');
     } catch (e) {
@@ -80,7 +80,7 @@ const EventDetail = () => {
         },
       };
       
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/eventRegistration/${id}/cancel`, config);
+      await axios.delete(`${import.meta.env.VITE_API_REGISTRATION_URL}/${id}/cancel`, config);
       setIsRegistered(false);
       alert('Registration cancelled');
     } catch (e) {

@@ -24,7 +24,7 @@ const Dashboard = () => {
                     },
                 };
                 
-                const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/auth/profile`, config);
+                const res = await axios.get(`${import.meta.env.VITE_API_AUTH_URL}/profile`, config);
                 setUser(res.data);
             } catch (error) {
                 console.error("Error fetching user:", error);
