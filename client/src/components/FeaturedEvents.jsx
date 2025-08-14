@@ -10,8 +10,13 @@ const FeaturedEvents = () => {
   useEffect(() => {
     const fetchFeaturedEvents = async () => {
       try {
-        const response = await axios.get('/api/events');
-        const allEvents = response.data.events || [];
+        const response = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}`);
+        const data = response?.data;
+        const allEvents = Array.isArray(data?.events)
+          ? data.events
+          : Array.isArray(data)
+          ? data
+          : [];
         
         // Filter for upcoming events and sort by date
         const upcomingEvents = allEvents

@@ -23,7 +23,13 @@ const Events = () => {
         }
         
         const response = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}`, config);
-        setEvents(response.data.events || response.data || []);
+        const data = response?.data;
+        const list = Array.isArray(data?.events)
+          ? data.events
+          : Array.isArray(data)
+          ? data
+          : [];
+        setEvents(list);
       } catch (error) {
         console.error('Error fetching events:', error);
       } finally {
