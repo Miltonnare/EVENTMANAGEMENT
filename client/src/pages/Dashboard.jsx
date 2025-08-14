@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../utils/api";
+import axios from "axios";
 import AttendeeDashboard from "../components/AttendeeDashboard";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import Navbar from "../components/Navbar";
@@ -17,8 +17,14 @@ const Dashboard = () => {
                     return;
                 }
 
-                const res = await api.get("/auth/profile");
-
+                const config = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                };
+                
+                const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/auth/profile`, config);
                 setUser(res.data);
             } catch (error) {
                 console.error("Error fetching user:", error);

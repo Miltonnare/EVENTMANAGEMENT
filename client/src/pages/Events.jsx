@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../utils/api';
+import axios from 'axios';
 import Navbar from '../components/Navbar';
 import EventCard from '../components/EventCard';
 
@@ -12,7 +12,17 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await api.get('/events');
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events`, config);
         setEvents(response.data.events || response.data || []);
       } catch (error) {
         console.error('Error fetching events:', error);

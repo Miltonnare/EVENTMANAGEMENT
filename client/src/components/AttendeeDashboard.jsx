@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../utils/api";
+import axios from "axios";
 
 const AttendeeDashboard = () => {
     const [registeredEvents, setRegisteredEvents] = useState([]);
@@ -11,7 +11,17 @@ const AttendeeDashboard = () => {
 
     const fetchRegisteredEvents = async () => {
         try {
-            const res = await api.get("/events/registered/me");
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            
+            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/registered/me`, config);
             setRegisteredEvents(res.data || []);
         } catch (error) {
             console.error("Error fetching registered events:", error);
@@ -24,7 +34,16 @@ const AttendeeDashboard = () => {
         if (!window.confirm("Are you sure you want to cancel this registration?")) return;
 
         try {
-            await api.delete(`/eventRegistration/${eventId}/cancel`);
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            };
+            
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/eventRegistration/${eventId}/cancel`, config);
+            
             // Refresh the list after cancellation
             setRegisteredEvents(prev => prev.filter(e => e._id !== eventId));
         } catch (error) {

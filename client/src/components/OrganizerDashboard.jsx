@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../utils/api";
+import axios from "axios";
 
 const OrganizerDashboard = ({  }) => {
     const [myEvents, setMyEvents] = useState([]);
@@ -20,7 +20,17 @@ const OrganizerDashboard = ({  }) => {
 
     const fetchMyEvents = async () => {
         try {
-            const res = await api.get("/events/mine/me");
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            
+            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/mine/me`, config);
             setMyEvents(res.data || []);
         } catch (error) {
             console.error("Error fetching my events:", error);
@@ -35,7 +45,16 @@ const OrganizerDashboard = ({  }) => {
 
     const handleCreateEvent = async () => {
         try {
-            await api.post("/events", formData);
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            };
+            
+            await axios.post(`${import.meta.env.VITE_API_BASE_URL}/events`, formData, config);
+            
             setFormData({ title: "", description: "", date: "", location: "" });
             setShowForm(false);
             fetchMyEvents();
@@ -46,7 +65,16 @@ const OrganizerDashboard = ({  }) => {
 
     const handleDeleteEvent = async (eventId) => {
         try {
-            await api.delete(`/events/${eventId}`);
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            };
+            
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/events/${eventId}`, config);
+            
             setMyEvents(myEvents.filter(e => e._id !== eventId));
         } catch (error) {
             console.error("Error deleting event:", error);
@@ -56,7 +84,15 @@ const OrganizerDashboard = ({  }) => {
     const handleViewAttendees = async (eventId) => {
         try {
             setSelectedEventId(eventId);
-            const res = await api.get(`/events/${eventId}/attendees`);
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            };
+            
+            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/${eventId}/attendees`, config);
             setAttendees(res.data.attendees || []);
         } catch (error) {
             console.error("Error fetching attendees:", error);

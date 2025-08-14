@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import axios from 'axios';
 import Navbar from '../components/Navbar';
 
 const EventDetail = () => {
@@ -14,13 +14,22 @@ const EventDetail = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await api.get(`/events/${id}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/${id}`, config);
         setEvent(res.data?.event || null);
 
-        const token = localStorage.getItem('token');
         if (token) {
           try {
-            const registeredRes = await api.get('/events/registered/me');
+            const registeredRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/events/registered/me`, config);
             const registeredEvents = registeredRes.data || [];
             setIsRegistered(registeredEvents.some((e) => e._id === id));
           } catch {}
@@ -42,11 +51,18 @@ const EventDetail = () => {
       return;
     }
     try {
-      await api.post(`/eventRegistration/${id}/register`);
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      };
+      
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/eventRegistration/${id}/register`, {}, config);
       setIsRegistered(true);
       alert('Registered successfully');
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to register');
+      alert(e.response?.data?.message || e.message || 'Failed to register');
     }
   };
 
@@ -57,11 +73,18 @@ const EventDetail = () => {
       return;
     }
     try {
-      await api.delete(`/eventRegistration/${id}/cancel`);
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      };
+      
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/eventRegistration/${id}/cancel`, config);
       setIsRegistered(false);
       alert('Registration cancelled');
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to cancel');
+      alert(e.response?.data?.message || e.message || 'Failed to cancel');
     }
   };
 

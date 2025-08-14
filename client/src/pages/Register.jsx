@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../utils/api';
+import axios from 'axios';
 import Navbar from '../components/Navbar';
 
 const Register = () => {
@@ -18,13 +18,23 @@ const Register = () => {
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/auth/register', form);
-      const { token, user } = res.data;
-      localStorage.setItem('token', token);
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, form, config);
+      const { token: newToken, user } = res.data;
+      localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(user));
       navigate('/dashboard');
     } catch (err) {
-      setError(err?.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || err.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
