@@ -22,7 +22,8 @@ const AttendeeDashboard = () => {
             }
             
             const res = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/registered/me`, config);
-            setRegisteredEvents(res.data || []);
+            setRegisteredEvents(res.data.events.events || []);
+            console.log(res.data.events);
         } catch (error) {
             console.error("Error fetching registered events:", error);
         } finally {
