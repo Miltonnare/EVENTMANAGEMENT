@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Register() {
+  const navigate=useNavigate();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -33,6 +36,7 @@ export default function Register() {
         form,
         config
       );
+      
      
       setMessage(res.data.message || "Registration successful!");
       setForm({
@@ -42,6 +46,8 @@ export default function Register() {
         phone: "",
         role: "attendee",
       });
+
+      navigate("/login");
     } catch (err) {
       setMessage(err.response?.data?.message || "Error registering user");
     }
