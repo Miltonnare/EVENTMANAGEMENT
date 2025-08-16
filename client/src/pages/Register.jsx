@@ -25,6 +25,7 @@ export default function Register() {
       const config = {
         headers: { "Content-Type": "application/json" },
       };
+      // console.log( `http://localhost:3000/api/auth/register`)
       const res = await axios.post(
         `${import.meta.env.VITE_API_AUTH_URL}/register`,
         form,
