@@ -90,10 +90,10 @@ const EventDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
         <Navbar />
         <div className="flex-grow flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
         </div>
       </div>
     );
@@ -101,15 +101,18 @@ const EventDetail = () => {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
         <Navbar />
         <div className="flex-grow flex items-center justify-center p-6 text-center">
-          <div>
-            <h1 className="text-2xl font-bold mb-2">Event Not Found</h1>
-            <p className="text-gray-600 mb-4">{error}</p>
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-violet-100/50 max-w-md">
+            <div className="text-6xl mb-4 filter drop-shadow-sm">⚠️</div>
+            <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-violet-800 to-purple-800 bg-clip-text text-transparent">
+              Event Not Found
+            </h1>
+            <p className="text-gray-700 mb-6">{error}</p>
             <button
               onClick={() => navigate('/events')}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 font-medium"
             >
               Back to Events
             </button>
@@ -123,31 +126,69 @@ const EventDetail = () => {
   const formatTime = (dateString) => new Date(dateString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
       <Navbar />
       <main className="flex-grow p-6">
-        <div className="max-w-3xl mx-auto bg-white rounded shadow p-6">
-          <button onClick={() => navigate('/events')} className="mb-6 text-blue-600 hover:text-blue-800">
-            ← Back to Events
+        <div className="max-w-3xl mx-auto">
+          {/* Back Button */}
+          <button 
+            onClick={() => navigate('/events')} 
+            className="mb-6 text-violet-600 hover:text-violet-800 font-medium flex items-center gap-2 transition-all duration-200 hover:gap-3 group"
+          >
+            <span className="text-lg group-hover:transform group-hover:-translate-x-1 transition-transform duration-200">←</span>
+            Back to Events
           </button>
 
-          <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
-          <p className="text-gray-700 mb-4">{event.description}</p>
-          <div className="text-sm text-gray-600 mb-6">
-            <div>Date: {formatDate(event.date)}</div>
-            <div>Time: {formatTime(event.date)}</div>
-            <div>Location: {event.location}</div>
-          </div>
+          {/* Main Event Card */}
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-violet-100/50 p-8 hover:shadow-2xl transition-all duration-300">
+            {/* Event Title */}
+            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-violet-800 via-purple-700 to-indigo-800 bg-clip-text text-transparent leading-tight">
+              {event.title}
+            </h1>
 
-          {isRegistered ? (
-            <button onClick={handleCancel} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-              Cancel Registration
-            </button>
-          ) : (
-            <button onClick={handleRegister} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Register for Event
-            </button>
-          )}
+            {/* Event Description */}
+            <div className="mb-8">
+              <p className="text-gray-700 text-lg leading-relaxed">{event.description}</p>
+            </div>
+
+            {/* Event Details */}
+            <div className="mb-8 bg-gradient-to-br from-indigo-600 via-purple-700 to-violet-800 backdrop-blur-sm rounded-xl p-6 border border-violet-200/30 shadow-lg">
+              <h3 className="text-xl font-bold text-white mb-6 text-center tracking-wide">Event Details</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 shadow-md border border-violet-100/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-wider">Date</div>
+                  <div className="text-lg font-extrabold text-gray-800 leading-tight">{formatDate(event.date)}</div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 shadow-md border border-violet-100/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="text-xs font-bold text-purple-600 mb-2 uppercase tracking-wider">Time</div>
+                  <div className="text-lg font-extrabold text-gray-800 leading-tight">{formatTime(event.date)}</div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-sm rounded-xl p-5 shadow-md border border-violet-100/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="text-xs font-bold text-violet-600 mb-2 uppercase tracking-wider">Location</div>
+                  <div className="text-lg font-extrabold text-gray-800 leading-tight break-words">{event.location}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Registration Button */}
+            <div className="flex justify-center">
+              {isRegistered ? (
+                <button 
+                  onClick={handleCancel} 
+                  className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-8 py-4 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-medium text-lg min-w-[200px]"
+                >
+                  Cancel Registration
+                </button>
+              ) : (
+                <button 
+                  onClick={handleRegister} 
+                  className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 font-medium text-lg min-w-[200px]"
+                >
+                  Register for Event
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
@@ -155,5 +196,3 @@ const EventDetail = () => {
 };
 
 export default EventDetail;
-
- 
