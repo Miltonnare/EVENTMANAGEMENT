@@ -14,12 +14,14 @@ const LandingPage = () => {
             <main className="flex-grow">
                 {/* Hero Section */}
                 <HeroSection />
+
+
+                {/* Featured Events Section */}
+                <FeaturedEvents />
                 
                 {/* Features Section */}
                 <FeaturesSection />
                 
-                {/* Featured Events Section */}
-                <FeaturedEvents />
                 
                 {/* Testimonials Section */}
                 <TestimonialsSection />
