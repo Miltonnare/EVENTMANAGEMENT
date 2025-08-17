@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const OrganizerDashboard = ({  }) => {
+const OrganizerDashboard = ({ }) => {
     const [myEvents, setMyEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -91,7 +91,7 @@ const OrganizerDashboard = ({  }) => {
                     'Authorization': `Bearer ${token}`,
                 },
             };
-            
+            console.log(import.meta.env.VITE_API_EVENTS_URL)
             const res = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/${eventId}/attendees`, config);
             setAttendees(res.data.attendees || []);
         } catch (error) {
