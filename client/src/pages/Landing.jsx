@@ -194,7 +194,7 @@ const LandingPage = () => {
                             </p>
                             <div className="flex items-center gap-4">
                                 <div className="w-8 h-px bg-gradient-to-r from-violet-400 to-purple-500"></div>
-                                <span className="text-violet-300 font-medium">Made with ❤️</span>
+                                <span className="text-violet-300 font-medium">Miltonnare</span>
                                 <div className="w-8 h-px bg-gradient-to-r from-purple-400 to-indigo-500"></div>
                             </div>
                         </div>
