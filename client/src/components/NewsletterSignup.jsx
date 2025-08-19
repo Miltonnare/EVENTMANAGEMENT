@@ -5,6 +5,7 @@ const NewsletterSignup = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message,setMessage]=useState('');
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,6 +36,7 @@ const NewsletterSignup = () => {
       // await axios.post('/api/newsletter/subscribe', { email });
       
       setIsSubscribed(true);
+      setMessage(resizeBy.data.message||"Subscribed Succesfully");
       setEmail('');
     } catch (error) {
       setError('Something went wrong. Please try again.');
