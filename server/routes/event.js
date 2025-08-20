@@ -7,6 +7,7 @@ const {createEvent,updateEvent,deleteEvent,getEvents,getEventsById,getMyEvents,g
 
 const protect=require('../middlewares/authMiddleware');
 
+
 router.get('/',getEvents);
 
 router.get('/mine/me', protect, getMyEvents);

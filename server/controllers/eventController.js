@@ -3,6 +3,12 @@ const Events=require('../models/Events');
 const createEvent=async (req,res)=>{
     try {
        const { title, description, date, location, capacity } = req.body;
+
+       let image=null;
+
+       if(req.file){
+        image=req.file.path
+       };
        const newEvent=new Events(
         {
             title,
@@ -11,6 +17,7 @@ const createEvent=async (req,res)=>{
             location,
             capacity,
             organizer:req.user._id,
+            image
         }
        );
 

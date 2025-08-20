@@ -26,6 +26,11 @@ const eventsSchema= new mongoose.Schema({
         required:false,
         min:[1,'At least one attendee']
     },
+
+    image:{
+        type:String
+
+    },
     organizer:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',
