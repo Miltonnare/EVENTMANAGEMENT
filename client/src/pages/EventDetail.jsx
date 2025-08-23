@@ -32,7 +32,10 @@ const EventDetail = () => {
             const registeredRes = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}/registered/me`, config);
             const registeredEvents = registeredRes.data || [];
             setIsRegistered(registeredEvents.some((e) => e._id === id));
-          } catch {}
+          } catch(error) {
+            console.error("Error:",error)
+           
+          }
         }
       } catch {
         setError('Unable to load event.');
