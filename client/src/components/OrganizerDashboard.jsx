@@ -183,7 +183,15 @@ const OrganizerDashboard = ({ }) => {
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {myEvents.map(event => (
+                        
                         <div key={event._id} className="bg-white shadow rounded p-4">
+                            <img 
+                            src={`${import.meta.env.VITE_API_URL}/${event.image}`}
+                           
+                            alt={event.title} 
+                            className="w-full h-40 object-cover round mb-4"
+                            />
+                            {/* console.log(`{import.meta.env.VITE_API_URL}/{event.image}`); */}
                             <h3 className="text-xl font-semibold">{event.title}</h3>
                             <p className="text-gray-600">{event.description}</p>
                             <p className="text-sm text-gray-500 mt-2">

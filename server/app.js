@@ -1,5 +1,6 @@
 const express=require('express');
 const cors=require('cors');
+const path = require('path');
 
 const authRoutes=require('./routes/auth');
 const eventsRoutes=require('./routes/event');
@@ -20,6 +21,7 @@ app.use(cors({
         'Authorization'
     ]
 }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use('/api/auth',authRoutes);
 app.use('/api/events',eventsRoutes);

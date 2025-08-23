@@ -7,8 +7,8 @@ const createEvent=async (req,res)=>{
        let image=null;
 
        if(req.file){
-        image=req.file.path
-       };
+       image = req.file.path.replace(/\\/g, "/");
+       }
        const newEvent=new Events(
         {
             title,
