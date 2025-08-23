@@ -9,7 +9,8 @@ const OrganizerDashboard = ({ }) => {
         title: "",
         description: "",
         date: "",
-        location: ""
+        location: "",
+        image:null
     });
     const [attendees, setAttendees] = useState([]);
     const [selectedEventId, setSelectedEventId] = useState(null);
@@ -43,26 +44,35 @@ const OrganizerDashboard = ({ }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleCreateEvent = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            };
-            
-            await axios.post(`${import.meta.env.VITE_API_EVENTS_URL}`, formData, config);
-            
-            setFormData({ title: "", description: "", date: "", location: "" });
-            setShowForm(false);
-            fetchMyEvents();
-        } catch (error) {
-            console.error("Error creating event:", error);
-        }
+   const handleCreateEvent = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",   // ✅ must be multipart
+        "Authorization": `Bearer ${token}`,
+      },
     };
 
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description);
+    form.append("date", formData.date);
+    form.append("location", formData.location);
+    if (formData.image) {
+      form.append("image", formData.image);   
+    }
+
+    await axios.post(`${import.meta.env.VITE_API_EVENTS_URL}`, form, config);
+
+    // Reset
+    setFormData({ title: "", description: "", date: "", location: "", image: null });
+    setShowForm(false);
+    fetchMyEvents();
+  } catch (error) {
+    console.error("Error creating event:", error);
+  }
+};
     const handleDeleteEvent = async (eventId) => {
         try {
             const token = localStorage.getItem('token');
@@ -148,6 +158,16 @@ const OrganizerDashboard = ({ }) => {
                         value={formData.location}
                         onChange={handleInputChange}
                         className="block w-full mb-4 p-2 border rounded"
+                    />
+                    <input
+                        type="file"
+                        name="image"
+                        placeholder="choose image"
+                        accept="image/*"
+                        // value={formData.image}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+                        className="block w-full mb-4 p-2 border rounded"
+
                     />
                     <button
                         onClick={handleCreateEvent}
