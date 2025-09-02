@@ -117,66 +117,90 @@ const OrganizerDashboard = ({ }) => {
     if (loading) return <p>Loading your events...</p>;
 
     return (
-        <div>
-            <h2 className="text-2xl font-bold mb-4">Your Events</h2>
+  <div className="max-w-2xl mx-auto p-6">
+    <h2 className="text-3xl font-bold mb-6 text-gray-800">Your Events</h2>
 
-            <button
-                onClick={() => setShowForm(!showForm)}
-                className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-                {showForm ? "Cancel" : "Create New Event"}
-            </button>
+    <button
+      onClick={() => setShowForm(!showForm)}
+      className={`mb-6 px-5 py-2.5 rounded-lg font-medium shadow-md transition 
+        ${showForm 
+          ? "bg-red-500 text-white hover:bg-red-600" 
+          : "bg-green-600 text-white hover:bg-green-700"}`}
+    >
+      {showForm ? "Cancel" : "Create New Event"}
+    </button>
 
-            {showForm && (
-                <div className="mb-6 p-4 border rounded">
-                    <input
-                        type="text"
-                        name="title"
-                        placeholder="Title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        className="block w-full mb-2 p-2 border rounded"
-                    />
-                    <textarea
-                        name="description"
-                        placeholder="Description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        className="block w-full mb-2 p-2 border rounded"
-                    ></textarea>
-                    <input
-                        type="date"
-                        name="date"
-                        value={formData.date}
-                        onChange={handleInputChange}
-                        className="block w-full mb-2 p-2 border rounded"
-                    />
-                    <input
-                        type="text"
-                        name="location"
-                        placeholder="Location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        className="block w-full mb-4 p-2 border rounded"
-                    />
-                    <input
-                        type="file"
-                        name="image"
-                        placeholder="choose image"
-                        accept="image/*"
-                        // value={formData.image}
-                        onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
-                        className="block w-full mb-4 p-2 border rounded"
+    {showForm && (
+      <div className="mb-8 p-6 border border-gray-200 rounded-2xl shadow-sm bg-white">
+        <input
+          type="text"
+          name="title"
+          placeholder="Event Title"
+          value={formData.title}
+          onChange={handleInputChange}
+          className="block w-full mb-4 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <textarea
+          name="description"
+          placeholder="Event Description"
+          value={formData.description}
+          onChange={handleInputChange}
+          rows="3"
+          className="block w-full mb-4 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        ></textarea>
+        <input
+          type="date"
+          name="date"
+          value={formData.date}
+          onChange={handleInputChange}
+          className="block w-full mb-4 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <input
+          type="text"
+          name="location"
+          placeholder="Event Location"
+          value={formData.location}
+          onChange={handleInputChange}
+          className="block w-full mb-4 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+       <div className="mb-6">
+  <input
+    type="file"
+    name="image"
+    accept="image/*"
+    onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+    className="block w-full mb-3 cursor-pointer text-sm text-gray-500 
+               file:mr-4 file:py-2 file:px-4 
+               file:rounded-lg file:border-0 
+               file:text-sm file:font-medium 
+               file:bg-blue-600 file:text-white 
+               hover:file:bg-blue-700 
+               focus:outline-none"
+  />
 
-                    />
-                    <button
-                        onClick={handleCreateEvent}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                        Save Event
-                    </button>
-                </div>
-            )}
+  {/* Image Preview */}
+  {formData.image && (
+    <div className="mt-3">
+      <img
+        src={URL.createObjectURL(formData.image)}
+        alt="Preview"
+        className="w-32 h-32 object-cover rounded-lg border shadow-sm"
+      />
+    </div>
+  )}
+</div>
+
+
+        <button
+          onClick={handleCreateEvent}
+          className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium shadow-md hover:bg-blue-700 transition"
+        >
+          Save Event
+        </button>
+      </div>
+    )}
+  
+
 
             {myEvents.length === 0 ? (
                 <p>No events created yet.</p>
