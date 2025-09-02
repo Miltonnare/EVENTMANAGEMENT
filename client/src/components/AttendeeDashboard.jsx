@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+
 const AttendeeDashboard = () => {
     const [registeredEvents, setRegisteredEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,7 +39,7 @@ const AttendeeDashboard = () => {
             const token = localStorage.getItem('token');
             const config = {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/formdata',
                     'Authorization': `Bearer ${token}`,
                 },
             };
@@ -65,6 +66,16 @@ const AttendeeDashboard = () => {
                     {registeredEvents.map(event => (
                         <div key={event._id} className="bg-white shadow rounded p-4">
                             <h3 className="text-xl font-semibold">{event.title}</h3>
+                             {event.image && (
+                <img
+                  src={`${import.meta.env.VITE_API_URL}/uploads/${event.image}`}
+                  
+                  alt={event.title}
+                  className="w-full h-48 object-cover rounded mb-3"
+                />
+              )}
+              console.log("Event image value:", event.image);
+
                             <p className="text-gray-600">{event.description}</p>
                             <p className="text-sm text-gray-500 mt-2">
                                 {new Date(event.date).toDateString()} @ {event.location}
