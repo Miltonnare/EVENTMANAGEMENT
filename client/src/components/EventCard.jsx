@@ -47,12 +47,12 @@ const EventCard = ({ event }) => {
         </div>
       </div>
        <img
-                  src={`${import.meta.env.VITE_API_URL}/uploads/${event.image}`}
+                  src={`${import.meta.env.VITE_API_URL}/${event.image}`}
                   
                   alt={event.title}
                   className="w-full h-48 object-cover rounded mb-3"
                 />
-              console.log("Events Image",`${event.image}``);
+             {/* console.log("Events Image:", `${import.meta.env.VITE_API_URL}/${event.image}`); */}
 
       <div className="p-6">
         {/* Description */}
