@@ -3,6 +3,17 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
 
+
+const InputField = ({ icon: Icon, ...props }) => (
+  <div className="relative">
+    <Icon className="absolute left-3 top-3 text-gray-500" size={20} />
+    <input
+      {...props}
+      className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+  </div>
+);
+
 export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -16,16 +27,6 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-
-  const InputField = ({ icon: Icon, ...props }) => (
-    <div className="relative">
-      <Icon className="absolute left-3 top-3 text-gray-500" size={20} />
-      <input
-        {...props}
-        className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-400"
-      />
-    </div>
-  );
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
