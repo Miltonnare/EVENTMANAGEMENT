@@ -1,19 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
-
-// ✅ InputField extracted outside
-const InputField = ({ icon: Icon, ...props }) => (
-  <div className="relative">
-    <Icon className="absolute left-3 top-3 text-gray-500" size={20} />
-    <input
-      {...props}
-      className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-white/80 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-400"
-    />
-  </div>
-);
 
 const OrganizerDashboard = () => {
   const [myEvents, setMyEvents] = useState([]);
@@ -28,16 +15,10 @@ const OrganizerDashboard = () => {
   });
   const [attendees, setAttendees] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState(null);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    role: "attendee",
-  });
+  
   const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
-  const navigate = useNavigate();
+//   const [isError, setIsError] = useState(false);
+//   const navigate = useNavigate();
 
   useEffect(() => {
     fetchMyEvents();
@@ -96,6 +77,7 @@ const OrganizerDashboard = () => {
       setShowForm(false);
       fetchMyEvents();
     } catch (error) {
+        setMessage("Could not Create Event");
       console.error("Error creating event:", error);
     }
   };
@@ -147,38 +129,7 @@ const OrganizerDashboard = () => {
     setAttendees([]);
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-    setIsError(false);
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_AUTH_URL}/register`,
-        form,
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      setMessage(res.data.message || "Registration successful!");
-      setForm({
-        name: "",
-        email: "",
-        password: "",
-        phone: "",
-        role: "attendee",
-      });
-
-      navigate("/login");
-    } catch (err) {
-      setMessage(err.response?.data?.message || "Error registering user");
-      setIsError(true);
-    }
-    setLoading(false);
-  };
 
   if (loading) return <p>Loading your events...</p>;
 
