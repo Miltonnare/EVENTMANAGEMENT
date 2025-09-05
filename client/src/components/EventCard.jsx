@@ -100,7 +100,7 @@ const EventCard = ({ event }) => {
                 <img 
                   src={event.qrCode} 
                   alt="Event QR Code - Scan to view details" 
-                  className='w-24 h-24 sm:w-28 sm:h-28 object-contain'
+                  className='w-24 h-24 border-2 border-blue-200 sm:w-28 sm:h-28 object-contain'
                 />
               </div>
               <p className="text-xs text-gray-600 mt-2 text-center font-medium">
