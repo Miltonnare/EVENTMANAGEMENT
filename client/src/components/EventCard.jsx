@@ -92,15 +92,20 @@ const EventCard = ({ event }) => {
           </div>
         </div>
         
-        {/* QR Code Section - Made responsive */}
+        {/* QR Code Section - Enhanced styling */}
         {
           event.qrCode && (
-            <div className='mt-3 sm:mt-4 flex justify-center'>
-              <img 
-                src={event.qrCode} 
-                alt="Event QR Code" 
-                className='w-24 h-24 sm:w-32 sm:h-32 border rounded-lg object-contain mb-4'
-              />
+            <div className='mt-4 flex flex-col items-center'>
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-gray-200/50">
+                <img 
+                  src={event.qrCode} 
+                  alt="Event QR Code - Scan to view details" 
+                  className='w-24 h-24 sm:w-28 sm:h-28 object-contain'
+                />
+              </div>
+              <p className="text-xs text-gray-600 mt-2 text-center font-medium">
+                Scan to view event details
+              </p>
             </div>
           )
         }

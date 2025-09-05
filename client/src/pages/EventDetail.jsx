@@ -154,6 +154,17 @@ const EventDetail = () => {
               <p className="text-gray-700 text-lg leading-relaxed">{event.description}</p>
             </div>
 
+            {/* Event Image */}
+            {event.image && (
+              <div className="mb-8">
+                <img 
+                  src={`${import.meta.env.VITE_API_URL}/${event.image}`} 
+                  alt={event.title}
+                  className="w-full h-64 object-cover rounded-xl shadow-lg border border-violet-200/30"
+                />
+              </div>
+            )}
+
             {/* Event Details */}
             <div className="mb-8 bg-gradient-to-br from-indigo-600 via-purple-700 to-violet-800 backdrop-blur-sm rounded-xl p-6 border border-violet-200/30 shadow-lg">
               <h3 className="text-xl font-bold text-white mb-6 text-center tracking-wide">Event Details</h3>
@@ -173,24 +184,45 @@ const EventDetail = () => {
               </div>
             </div>
 
-            {/* Registration Button */}
-            <div className="flex justify-center">
-              {isRegistered ? (
-                <button 
-                  onClick={handleCancel} 
-                  className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-8 py-4 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-medium text-lg min-w-[200px]"
-                >
-                  Cancel Registration
-                </button>
-              ) : (
-                <button 
-                  onClick={handleRegister} 
-                  className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 font-medium text-lg min-w-[200px]"
-                >
-                  Register for Event
-                </button>
-              )}
-            </div>
+                         {/* Registration Button */}
+             <div className="flex justify-center mb-8">
+               {isRegistered ? (
+                 <button 
+                   onClick={handleCancel} 
+                   className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-8 py-4 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-medium text-lg min-w-[200px]"
+                 >
+                   Cancel Registration
+                 </button>
+               ) : (
+                 <button 
+                   onClick={handleRegister} 
+                   className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 font-medium text-lg min-w-[200px]"
+                 >
+                   Register for Event
+                 </button>
+               )}
+             </div>
+
+             {/* QR Code Section */}
+             {event.qrCode && (
+               <div className="border-t border-violet-200/30 pt-8">
+                 <h3 className="text-xl font-bold text-center mb-6 bg-gradient-to-r from-violet-800 to-purple-800 bg-clip-text text-transparent">
+                   Share This Event
+                 </h3>
+                 <div className="flex flex-col items-center">
+                   <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-violet-200/50">
+                     <img 
+                       src={event.qrCode} 
+                       alt="Event QR Code - Scan to view details" 
+                       className="w-48 h-48 object-contain"
+                     />
+                   </div>
+                   <p className="text-gray-600 mt-4 text-center font-medium max-w-md">
+                     Scan this QR code to quickly access this event details and share with others
+                   </p>
+                 </div>
+               </div>
+             )}
           </div>
         </div>
       </main>

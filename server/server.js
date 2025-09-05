@@ -7,7 +7,7 @@ dotenv.config();
 
 connectDb();
 
-const PORT=process.env.PORT||5000;
+const PORT=process.env.PORT;
 console.log(PORT)
 
 app.listen(PORT,()=>{

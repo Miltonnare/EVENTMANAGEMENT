@@ -11,17 +11,6 @@ const createEvent=async (req,res)=>{
        image = req.file.path.replace(/\\/g, "/");
        }
        
-       // Create QR code data with event details
-       const eventData = {
-           title,
-           description,
-           date,
-           location,
-           image,
-           organizer: req.user._id
-       };
-       
-       const qrCodeDataUrl = await QrCode.toDataURL(JSON.stringify(eventData))
        const newEvent=new Events(
         {
             title,
@@ -31,10 +20,17 @@ const createEvent=async (req,res)=>{
             capacity,
             organizer:req.user._id,
             image,
-            qrCode:qrCodeDataUrl,
         }
        );
 
+       await newEvent.save();
+       
+       // Create QR code with URL to event details page using the saved event ID
+       const eventUrl = `${process.env.CLIENT_URL}/events/${newEvent._id}`;
+       const qrCodeDataUrl = await QrCode.toDataURL(eventUrl);
+       
+       // Update the event with the QR code
+       newEvent.qrCode = qrCodeDataUrl;
        await newEvent.save();
        res.status(200).json({ success: true, event: newEvent});
     } catch (error) {
