@@ -28,7 +28,8 @@ const eventsSchema= new mongoose.Schema({
     },
 
     image:{
-        type:String
+        type:String,
+        qrCode:string
 
     },
     organizer:{
