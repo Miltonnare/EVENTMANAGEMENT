@@ -88,6 +88,16 @@ const EventCard = ({ event }) => {
             </div>
           </div>
         </div>
+        {
+          event.qrCode &&(
+            <div className='mt-4 flex justify-center'>
+              <img 
+              src={event.qrCode} alt="Event QR Code" 
+              className='w-32 h-32 border rounded-lg'
+              />
+            </div>
+          )
+        }
         
         {/* Action Buttons */}
         <div className="flex gap-3">

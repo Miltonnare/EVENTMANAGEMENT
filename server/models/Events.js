@@ -28,9 +28,10 @@ const eventsSchema= new mongoose.Schema({
     },
 
     image:{
-        type:String,
-        qrCode:string
-
+        type:String
+    },
+    qrCode:{
+        type:String
     },
     organizer:{
         type:mongoose.Schema.Types.ObjectId,
