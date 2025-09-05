@@ -1,4 +1,5 @@
 const Events=require('../models/Events');
+const QrCode=require(qrcode);
 
 const createEvent=async (req,res)=>{
     try {
@@ -9,6 +10,7 @@ const createEvent=async (req,res)=>{
        if(req.file){
        image = req.file.path.replace(/\\/g, "/");
        }
+       const qrCodeDataUrl=await QrCode.toDataURL(eventData)
        const newEvent=new Events(
         {
             title,
@@ -17,7 +19,8 @@ const createEvent=async (req,res)=>{
             location,
             capacity,
             organizer:req.user._id,
-            image
+            image,
+            qrcode:qrCodeDataUrl,
         }
        );
 
