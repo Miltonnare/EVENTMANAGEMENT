@@ -1,44 +1,50 @@
-const express=require('express');
-const cors=require('cors');
+const express = require('express');
+const cors = require('cors');
 const path = require('path');
 
-const authRoutes=require('./routes/auth');
-const eventsRoutes=require('./routes/event');
-const eventRegRoutes=require('./routes/registration');
+const authRoutes = require('./routes/auth');
+const eventsRoutes = require('./routes/event');
+const eventRegRoutes = require('./routes/registration');
 
-const app=express();
-
+const app = express();
 
 app.use(express.json());
+
 app.use(cors({
-    origin:function(origin,callback){
-        const allowedOrigins=process.env.CLIENT_URL;
+    origin: function (origin, callback) {
+        
+        const allowedOriginsString = process.env.ALLOWED_ORIGINS || ''; 
+        
+        
+        const allowedOrigins = allowedOriginsString.split(',').map(url => url.trim().replace(/\/$/, ''));
+        
 
-        if (!origin) return callback
-        const normalizedOrigin=origin.replace(/\/$/,'');
-        const normalizedAllowed=allowedOrigins.map(url=>url.replace(/\/$/,''));
-
-        if(normalizedAllowed.includes(normalizedOrign)){
-            return callback(null,true);
+        if (!origin) return callback(null, true);
+        
+        
+        const normalizedOrigin = origin.replace(/\/$/, '');
+        
+      
+        if (allowedOrigins.includes(normalizedOrigin)) {
+            return callback(null, true);
+        } else {
+            const msg = `The CORS policy for this site does not allow access from the origin: ${origin}. Allowed: ${allowedOriginsString}`;
+            return callback(new Error(msg), false);
         }
-        callback(new Error('Not Allowed by CORS'))
     },
     credentials: true,
-    methods: [
-        'POST', 'GET', 'PUT', 'PATCH', 'DELETE'
-    ],
-    allowedHeaders: [
-        'Content-Type',
-        'Authorization'
-    ]
+    methods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use('/api/auth',authRoutes);
-app.use('/api/events',eventsRoutes);
-app.use('/api/eventRegistration',eventRegRoutes);
-app.get('/',(req,res)=>{
-    res.send('Events APP Running Succesfully');
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventsRoutes);
+app.use('/api/eventRegistration', eventRegRoutes);
+
+app.get('/', (req, res) => {
+    res.send('Events APP Running Successfully');
 });
 
-module.exports=app;
+module.exports = app;
