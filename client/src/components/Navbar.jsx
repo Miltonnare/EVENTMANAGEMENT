@@ -16,7 +16,7 @@ const Navbar = () => {
         localStorage.removeItem('user');
         setIsAuthed(false);
         navigate('/login');
-        setIsMobileMenuOpen(false); // Close mobile menu on logout
+        setIsMobileMenuOpen(false); 
     };
 
     const closeMobileMenu = () => {
