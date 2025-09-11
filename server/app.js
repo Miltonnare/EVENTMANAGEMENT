@@ -11,7 +11,18 @@ const app=express();
 
 app.use(express.json());
 app.use(cors({
-    origin:process.env.CLIENT_URL,
+    origin:function(origin,callback){
+        const allowedOrigins=process.env.CLIENT_URL;
+
+        if (!origin) return callback
+        const normalizedOrigin=origin.replace(/\/$/,'');
+        const normalizedAllowed=allowedOrigins.map(url=>url.replace(/\/$/,''));
+
+        if(normalizedAllowed.includes(normalizedOrign)){
+            return callback(null,true);
+        }
+        callback(new Error('Not Allowed by CORS'))
+    },
     credentials: true,
     methods: [
         'POST', 'GET', 'PUT', 'PATCH', 'DELETE'
