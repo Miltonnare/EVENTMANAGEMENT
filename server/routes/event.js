@@ -6,6 +6,7 @@ const router=express.Router();
 const {createEvent,updateEvent,deleteEvent,getEvents,getEventsById,getMyEvents,getRegisteredEvents,getEventAttendees}=require('../controllers/eventController')
 const protect=require('../middlewares/authMiddleware');
 const {upload}=require('../middlewares/uploadMiddleware');
+const {upload}=require('../config/cloudinary')
 
 
 
