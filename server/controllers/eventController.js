@@ -1,41 +1,89 @@
 const Events=require('../models/Events');
 const QrCode=require('qrcode');
 
-const createEvent=async (req,res)=>{
+const createEvent = async (req, res) => {
     try {
+        // Input validation
        const { title, description, date, location, capacity } = req.body;
 
-       let image=null;
-
-       if(req.file){
-       image = req.file.path.replace(/\\/g, "/");
-       }
-       
-       const newEvent=new Events(
-        {
-            title,
-            description,
-            date,
-            location,
-            capacity,
-            organizer:req.user._id,
-            image,
+        // Validate required fields
+        if (!title || !description || !date || !location) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: title, description, date, and location are required'
+            });
         }
-       );
+
+        // Validate date
+        const eventDate = new Date(date);
+        if (isNaN(eventDate.getTime()) || eventDate < new Date()) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid date. Date must be a valid future date'
+            });
+        }
+
+        // Validate capacity 
+        if (capacity && (isNaN(capacity) || capacity < 1)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Capacity must be a positive number'
+            });
+        }
+
+        // Handle image upload
+        let imageUrl = null;
+        if (req.file) {
+            // For Cloudinary, the secure_url contains the full URL
+            imageUrl = req.file.secure_url;
+        }
+
+        // Create new event
+        const newEvent = new Events({
+            title: title.trim(),
+            description: description.trim(),
+            date: eventDate,
+            location: location.trim(),
+            capacity: capacity || null,
+            organizer: req.user._id,
+            image: imageUrl,
+        });
 
        await newEvent.save();
        
-       // Create QR code with URL to event details page using the saved event ID
+       
        const eventUrl = `${process.env.CLIENT_URL}/events/${newEvent._id}`;
        const qrCodeDataUrl = await QrCode.toDataURL(eventUrl);
        
-       // Update the event with the QR code
+      
        newEvent.qrCode = qrCodeDataUrl;
        await newEvent.save();
-       res.status(200).json({ success: true, event: newEvent});
+
+    
+        await newEvent.populate('organizer', 'name email');
+
+        res.status(201).json({
+            success: true,
+            message: 'Event created successfully',
+            event: newEvent
+        });
+
     } catch (error) {
-        res.status(500).json({success:false,error:error.message});
-        
+        console.error('Create event error:', error);
+       
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                error: 'Validation error',
+                details: errors
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error. Please try again later.'
+        });
     }
 };
 
@@ -96,45 +144,139 @@ const getEventAttendees = async (req, res) => {
 const updateEvent = async (req, res) => {
     try {
         const { title, description, date, location, capacity } = req.body;
+        
         // Find the event first
         const event = await Events.findById(req.params.id);
         if (!event) {
-            return res.status(404).json({ success: false, error: 'Event Not Found' });
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Event not found' 
+            });
         }
 
         // Check if the user is the organizer
         if (String(event.organizer) !== req.user._id.toString()) {
-            return res.status(403).json({ success: false, error: 'Unauthorized' });
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Unauthorized. Only the event organizer can update this event.' 
+            });
         }
 
-        // Update the event
-        event.title = title;
-        event.description = description;
-        event.date = date;
-        event.location = location;
-        event.capacity = capacity;
-        await event.save();
+        // Validate date if provided
+        if (date) {
+            const eventDate = new Date(date);
+            if (isNaN(eventDate.getTime()) || eventDate < new Date()) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid date. Date must be a valid future date'
+                });
+            }
+            event.date = eventDate;
+        }
 
+        // Validate capacity if provided
+        if (capacity !== undefined) {
+            if (isNaN(capacity) || capacity < 1) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Capacity must be a positive number'
+                });
+            }
+        event.capacity = capacity;
+        }
+
+        // Update fields if provided
+        if (title) event.title = title.trim();
+        if (description) event.description = description.trim();
+        if (location) event.location = location.trim();
+
+        // Handle image update if new image is uploaded
+        if (req.file) {
+            // Delete old image from Cloudinary if it exists
+            if (event.image) {
+                try {
+                    const cloudinary = require('cloudinary').v2;
+                    const publicId = event.image.split('/').pop().split('.')[0];
+                    await cloudinary.uploader.destroy(`event-management-app/${publicId}`);
+                } catch (deleteError) {
+                    console.warn('Failed to delete old image:', deleteError.message);
+                    // Continue with update even if old image deletion fails
+                }
+            }
+            
+            // Set new image URL
+            event.image = req.file.secure_url;
+        }
+
+        await event.save();
         await event.populate('organizer', 'name email');
-        res.status(200).json({ success: true, event });
+        
+        res.status(200).json({ 
+            success: true, 
+            message: 'Event updated successfully',
+            event 
+        });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Update event error:', error);
+        
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                error: 'Validation error',
+                details: errors
+            });
+        }
+
+        res.status(500).json({ 
+            success: false, 
+            error: 'Internal server error. Please try again later.' 
+        });
     }
 };
 
-const deleteEvent=async (req, res) => {
+const deleteEvent = async (req, res) => {
   try {
     const event = await Events.findById(req.params.id);
-    if (!event) return res.status(404).json({ success: false, error: 'Event not found' });
+        if (!event) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Event not found' 
+            });
+        }
 
+        // Check if the user is the organizer
     if (String(event.organizer) !== req.user._id.toString()) {
-      return res.status(403).json({ success: false, error: 'Unauthorized' });
-    }
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Unauthorized. Only the event organizer can delete this event.' 
+            });
+        }
 
-    await event.remove();
-    res.status(200).json({ success: true, message: 'Event deleted' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+        // Delete image from Cloudinary if it exists
+        if (event.image) {
+            try {
+                const cloudinary = require('cloudinary').v2;
+              
+                const publicId = event.image.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(`event-management-app/${publicId}`);
+            } catch (deleteError) {
+                console.warn('Failed to delete image from Cloudinary:', deleteError.message);
+                
+            }
+        }
+
+        await Events.findByIdAndDelete(req.params.id);
+        res.status(200).json({ 
+            success: true, 
+            message: 'Event deleted successfully' 
+        });
+    } catch (error) {
+        console.error('Delete event error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Internal server error. Please try again later.' 
+        });
   }
 };
 

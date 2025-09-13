@@ -1,12 +1,20 @@
 
-const express=require('express');
+const express = require('express');
+const router = express.Router();
 
-const router=express.Router();
+const {
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  getEvents,
+  getEventsById,
+  getMyEvents,
+  getRegisteredEvents,
+  getEventAttendees
+} = require('../controllers/eventController');
 
-const {createEvent,updateEvent,deleteEvent,getEvents,getEventsById,getMyEvents,getRegisteredEvents,getEventAttendees}=require('../controllers/eventController')
-const protect=require('../middlewares/authMiddleware');
-const {upload}=require('../middlewares/uploadMiddleware');
-const {upload}=require('../config/cloudinary')
+const protect = require('../middlewares/authMiddleware');
+const { upload, handleUploadError } = require('../config/cloudinary');
 
 
 
@@ -18,8 +26,8 @@ router.get('/:eventId/attendees', protect, getEventAttendees);
 
 router.get('/:id',getEventsById);
 
-router.post('/',protect,upload.single("image"),createEvent);
-router.put('/:id',protect,updateEvent);
+router.post('/', protect, upload.single("image"), handleUploadError, createEvent);
+router.put('/:id', protect, upload.single("image"), handleUploadError, updateEvent);
 router.delete('/:id', protect,deleteEvent);
 
 module.exports=router;
