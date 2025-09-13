@@ -2,168 +2,130 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
-const hpp = require('hpp');
 
-const createRateLimit = (windowMs, max, message) => {
-    return rateLimit({
-        windowMs,
-        max,
-        message: {
-            success: false,
-            error: message
-        },
-        standardHeaders: true,
-        legacyHeaders: false,
-        handler: (req, res) => {
-            res.status(429).json({
-                success: false,
-                error: message,
-                retryAfter: Math.round(windowMs / 1000)
-            });
-        }
-    });
-};
+// Rate limiting configurations
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.',
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 auth requests per windowMs
+    message: {
+        error: 'Too many authentication attempts from this IP, please try again later.',
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
-const generalLimiter = createRateLimit(
-    15 * 60 * 1000, 
-    100, 
-    'Too many requests from this IP, please try again later.'
-);
+const uploadLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // limit each IP to 20 upload requests per windowMs
+    message: {
+        error: 'Too many upload attempts from this IP, please try again later.',
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
-
-const authLimiter = createRateLimit(
-    15 * 60 * 1000, // 15 minutes
-    5, // 5 requests per window
-    'Too many authentication attempts, please try again later.'
-);
-
-// File upload rate limiting
-const uploadLimiter = createRateLimit(
-    60 * 60 * 1000, 
-    10, 
-    'Too many file uploads, please try again later.'
-);
-
-// Security middleware configuration
+// Security middleware function
 const securityMiddleware = (app) => {
-    
+    // Helmet for security headers
     app.use(helmet({
+        crossOriginEmbedderPolicy: false,
         contentSecurityPolicy: {
             directives: {
                 defaultSrc: ["'self'"],
-                styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-                fontSrc: ["'self'", "https://fonts.gstatic.com"],
-                imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
+                styleSrc: ["'self'", "'unsafe-inline'"],
                 scriptSrc: ["'self'"],
-                connectSrc: ["'self'"]
-            }
+                imgSrc: ["'self'", "data:", "https:"],
+            },
         },
-        crossOriginEmbedderPolicy: false
     }));
 
-    
-    app.use(mongoSanitize());
+    // MongoDB injection prevention with fixed configuration
+    app.use(mongoSanitize({
+        replaceWith: '_', // Replace prohibited characters with underscore
+        onSanitize: ({ req, key }) => {
+            console.warn(`Sanitized key: ${key} in request`);
+        },
+    }));
 
-    // Data sanitization against XSS
+    // XSS protection
     app.use(xss());
 
-    // Prevent parameter pollution
-    app.use(hpp());
-
-    // Trust proxy for accurate IP addresses
-    app.set('trust proxy', 1);
+    // Additional security headers
+    app.use((req, res, next) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        next();
+    });
 };
 
-// File upload security validation
+// File upload validation middleware
 const validateFileUpload = (req, res, next) => {
-    if (!req.file) {
-        return next();
-    }
+    if (req.file) {
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
 
-    // Check file size
-    const maxSize = parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024; // 10MB default
-    if (req.file.size > maxSize) {
-        return res.status(400).json({
-            success: false,
-            error: `File too large. Maximum size is ${Math.round(maxSize / 1024 / 1024)}MB.`
-        });
-    }
+        if (!allowedMimeTypes.includes(req.file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.',
+            });
+        }
 
-    // Check file type
-    const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'jpg,jpeg,png,gif').split(',');
-    const fileExtension = req.file.originalname.split('.').pop().toLowerCase();
-    
-    if (!allowedTypes.includes(fileExtension)) {
-        return res.status(400).json({
-            success: false,
-            error: `Invalid file type. Allowed types: ${allowedTypes.join(', ')}.`
-        });
+        if (req.file.size > maxSize) {
+            return res.status(400).json({
+                success: false,
+                error: 'File too large. Maximum size is 5MB.',
+            });
+        }
     }
-
-    // Check MIME type
-    const allowedMimeTypes = [
-        'image/jpeg',
-        'image/jpg', 
-        'image/png',
-        'image/gif'
-    ];
-    
-    if (!allowedMimeTypes.includes(req.file.mimetype)) {
-        return res.status(400).json({
-            success: false,
-            error: 'Invalid file MIME type. Only images are allowed.'
-        });
-    }
-
     next();
 };
 
-// Input validation middleware
+// Event input validation middleware
 const validateEventInput = (req, res, next) => {
-    const { title, description, date, location, capacity } = req.body;
+    if (req.method === 'POST' || req.method === 'PUT') {
+        const { title, description, date, location } = req.body;
 
-    // Sanitize string inputs
-    if (title) req.body.title = title.trim();
-    if (description) req.body.description = description.trim();
-    if (location) req.body.location = location.trim();
-
-    // Validate title
-    if (title && (title.length < 3 || title.length > 100)) {
-        return res.status(400).json({
-            success: false,
-            error: 'Title must be between 3 and 100 characters.'
-        });
-    }
-
-    // Validate description
-    if (description && (description.length < 10 || description.length > 2000)) {
-        return res.status(400).json({
-            success: false,
-            error: 'Description must be between 10 and 2000 characters.'
-        });
-    }
-
-    // Validate location
-    if (location && (location.length < 3 || location.length > 200)) {
-        return res.status(400).json({
-            success: false,
-            error: 'Location must be between 3 and 200 characters.'
-        });
-    }
-
-    // Validate capacity
-    if (capacity !== undefined && capacity !== null && capacity !== '') {
-        const cap = parseInt(capacity);
-        if (isNaN(cap) || cap < 1 || cap > 10000) {
+        if (!title || title.trim().length < 3) {
             return res.status(400).json({
                 success: false,
-                error: 'Capacity must be a number between 1 and 10,000.'
+                error: 'Title must be at least 3 characters long.',
             });
         }
-        req.body.capacity = cap;
-    }
 
+        if (!description || description.trim().length < 10) {
+            return res.status(400).json({
+                success: false,
+                error: 'Description must be at least 10 characters long.',
+            });
+        }
+
+        if (!date || new Date(date) < new Date()) {
+            return res.status(400).json({
+                success: false,
+                error: 'Event date must be in the future.',
+            });
+        }
+
+        if (!location || location.trim().length < 3) {
+            return res.status(400).json({
+                success: false,
+                error: 'Location must be at least 3 characters long.',
+            });
+        }
+    }
     next();
 };
 
@@ -173,5 +135,5 @@ module.exports = {
     uploadLimiter,
     securityMiddleware,
     validateFileUpload,
-    validateEventInput
+    validateEventInput,
 };
