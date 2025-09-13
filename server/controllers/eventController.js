@@ -6,7 +6,7 @@ const createEvent = async (req, res) => {
         // Input validation
        const { title, description, date, location, capacity } = req.body||{};
 
-        // Validate required fields
+        // Validate required fields (capacity is NOT required)
         if (!title || !description || !date || !location) {
             return res.status(400).json({
                 success: false,
@@ -23,12 +23,15 @@ const createEvent = async (req, res) => {
             });
         }
 
-        // Validate capacity 
-        if (capacity && (isNaN(capacity) || capacity < 1)) {
-            return res.status(400).json({
-                success: false,
-                error: 'Capacity must be a positive number'
-            });
+        // Validate capacity only if provided (completely optional)
+        if (capacity !== undefined && capacity !== null && capacity !== '') {
+            const numCapacity = Number(capacity);
+            if (isNaN(numCapacity) || numCapacity < 1) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Capacity must be a positive number when provided'
+                });
+            }
         }
 
         // Handle image upload
@@ -38,16 +41,23 @@ const createEvent = async (req, res) => {
             imageUrl = req.file.secure_url;
         }
 
-        // Create new event
-        const newEvent = new Events({
+        // Prepare event data - only include capacity if it's a valid number
+        const eventData = {
             title: title.trim(),
             description: description.trim(),
             date: eventDate,
             location: location.trim(),
-            capacity: capacity || null,
             organizer: req.user._id,
             image: imageUrl,
-        });
+        };
+
+        // Only add capacity if it's provided and valid
+        if (capacity !== undefined && capacity !== null && capacity !== '' && !isNaN(Number(capacity))) {
+            eventData.capacity = Number(capacity);
+        }
+
+        // Create new event
+        const newEvent = new Events(eventData);
 
        await newEvent.save();
        
@@ -175,15 +185,16 @@ const updateEvent = async (req, res) => {
             event.date = eventDate;
         }
 
-        // Validate capacity if provided
-        if (capacity !== undefined) {
-            if (isNaN(capacity) || capacity < 1) {
+        // Validate capacity only if provided (completely optional)
+        if (capacity !== undefined && capacity !== null && capacity !== '') {
+            const numCapacity = Number(capacity);
+            if (isNaN(numCapacity) || numCapacity < 1) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Capacity must be a positive number'
+                    error: 'Capacity must be a positive number when provided'
                 });
             }
-        event.capacity = capacity;
+            event.capacity = numCapacity;
         }
 
         // Update fields if provided

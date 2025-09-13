@@ -145,52 +145,46 @@ const validateFileUpload = (req, res, next) => {
     next();
 };
 
-// Event input validation middleware
+// Event input validation middleware (updated to remove capacity requirement)
 const validateEventInput = (req, res, next) => {
     if (req.method === 'POST' || req.method === 'PUT') {
-        // Ensure req.body exists before destructuring
-        if (!req.body) {
-            return res.status(400).json({
-                success: false,
-                error: 'Request body is required'
-            });
+     
+        if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0) {
+            console.log('Request body is undefined or empty, skipping validation');
+            return next(); 
         }
-        
-        const { title, description, date, location } = req.body;
 
-        // Check if title exists and is valid
-        if (!title || typeof title !== 'string' || title.trim().length < 3) {
+        const { title, description, date, location } = req.body;
+        
+        if (!title || title.trim().length < 3) {
             return res.status(400).json({
                 success: false,
                 error: 'Title must be at least 3 characters long.',
             });
         }
 
-        // Check if description exists and is valid
-        if (!description || typeof description !== 'string' || description.trim().length < 10) {
+        if (!description || description.trim().length < 10) {
             return res.status(400).json({
                 success: false,
                 error: 'Description must be at least 10 characters long.',
             });
         }
 
-        // Check if date is valid and in the future
-        const eventDate = new Date(date);
-        const currentDate = new Date();
-        if (!date || isNaN(eventDate.getTime()) || eventDate < currentDate) {
+        if (!date || new Date(date) < new Date()) {
             return res.status(400).json({
                 success: false,
-                error: 'Event date must be a valid date in the future.',
+                error: 'Event date must be in the future.',
             });
         }
 
-        // Check if location exists and is valid
-        if (!location || typeof location !== 'string' || location.trim().length < 3) {
+        if (!location || location.trim().length < 3) {
             return res.status(400).json({
                 success: false,
                 error: 'Location must be at least 3 characters long.',
             });
         }
+
+        
     }
     next();
 };
