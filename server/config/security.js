@@ -1,6 +1,6 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const xss = require('xss-clean');
+const { xss } = require('express-xss-sanitizer'); // REPLACEMENT for xss-clean
 
 // Custom NoSQL injection sanitization function
 const sanitizeObject = (obj) => {
@@ -76,7 +76,9 @@ const securityMiddleware = (app) => {
         },
     }));
 
-    // Custom NoSQL injection prevention (safer approach)
+    
+    app.use(xss()); 
+  
     app.use((req, res, next) => {
         try {
             // Sanitize request body
@@ -84,12 +86,12 @@ const securityMiddleware = (app) => {
                 req.body = sanitizeObject(req.body);
             }
             
-           
+           CH
             if (req.query && typeof req.query === 'object') {
                 const sanitizedQuery = sanitizeObject(req.query);
                 
-                Object.keys(req.query).forEach(key => delete req.query[key]);
-                Object.assign(req.query, sanitizedQuery);
+              
+                req.query = sanitizedQuery;
             }
             
             // Sanitize URL parameters
@@ -103,9 +105,6 @@ const securityMiddleware = (app) => {
             next();
         }
     });
-
-    // XSS protection
-    app.use(xss());
 
     // Additional security headers
     app.use((req, res, next) => {
