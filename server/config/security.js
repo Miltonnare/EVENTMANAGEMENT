@@ -148,6 +148,14 @@ const validateFileUpload = (req, res, next) => {
 // Event input validation middleware
 const validateEventInput = (req, res, next) => {
     if (req.method === 'POST' || req.method === 'PUT') {
+        // Ensure req.body exists before destructuring
+        if (!req.body) {
+            return res.status(400).json({
+                success: false,
+                error: 'Request body is required'
+            });
+        }
+        
         const { title, description, date, location } = req.body;
 
         // Check if title exists and is valid

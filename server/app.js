@@ -12,8 +12,7 @@ const {
     authLimiter,
     uploadLimiter,
     securityMiddleware,
-    validateFileUpload,
-    validateEventInput
+    validateFileUpload
 } = require('./config/security');
 
 const app = express();
@@ -60,7 +59,7 @@ securityMiddleware(app);
 
 
 app.use('/api/auth', authRoutes);
-app.use('/api/events', validateEventInput, eventsRoutes);
+app.use('/api/events', eventsRoutes);
 app.use('/api/eventRegistration', eventRegRoutes);
 
 // Health check endpoint

@@ -70,7 +70,7 @@ const createEvent = async (req, res) => {
 
     } catch (error) {
         console.error('Create event error:', error);
-       
+        
         if (error.name === 'ValidationError') {
             const errors = Object.values(error.errors).map(err => err.message);
             return res.status(400).json({
@@ -82,7 +82,8 @@ const createEvent = async (req, res) => {
 
         res.status(500).json({
             success: false,
-            error: 'Internal server error. Please try again later.'
+            error: 'Internal server error. Please try again later.',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };

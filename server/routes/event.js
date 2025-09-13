@@ -15,6 +15,7 @@ const {
 
 const protect = require('../middlewares/authMiddleware');
 const { upload, handleUploadError } = require('../config/cloudinary');
+const { validateEventInput } = require('../config/security');
 
 
 
@@ -26,8 +27,8 @@ router.get('/:eventId/attendees', protect, getEventAttendees);
 
 router.get('/:id',getEventsById);
 
-router.post('/', protect, upload.single("image"), handleUploadError, createEvent);
-router.put('/:id', protect, upload.single("image"), handleUploadError, updateEvent);
+router.post('/', protect, validateEventInput, upload.single("image"), handleUploadError, createEvent);
+router.put('/:id', protect, validateEventInput, upload.single("image"), handleUploadError, updateEvent);
 router.delete('/:id', protect,deleteEvent);
 
 module.exports=router;
