@@ -57,7 +57,7 @@ app.use(cors({
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// API routes with validation middleware
+
 app.use('/api/auth', authRoutes);
 app.use('/api/events', validateEventInput, eventsRoutes);
 app.use('/api/eventRegistration', eventRegRoutes);
