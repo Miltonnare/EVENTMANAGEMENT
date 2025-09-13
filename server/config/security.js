@@ -4,7 +4,6 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 
-// Rate limiting configuration
 const createRateLimit = (windowMs, max, message) => {
     return rateLimit({
         windowMs,
@@ -25,14 +24,14 @@ const createRateLimit = (windowMs, max, message) => {
     });
 };
 
-// General API rate limiting
+
 const generalLimiter = createRateLimit(
-    15 * 60 * 1000, // 15 minutes
-    100, // 100 requests per window
+    15 * 60 * 1000, 
+    100, 
     'Too many requests from this IP, please try again later.'
 );
 
-// Strict rate limiting for auth endpoints
+
 const authLimiter = createRateLimit(
     15 * 60 * 1000, // 15 minutes
     5, // 5 requests per window
@@ -41,14 +40,14 @@ const authLimiter = createRateLimit(
 
 // File upload rate limiting
 const uploadLimiter = createRateLimit(
-    60 * 60 * 1000, // 1 hour
-    10, // 10 uploads per hour
+    60 * 60 * 1000, 
+    10, 
     'Too many file uploads, please try again later.'
 );
 
 // Security middleware configuration
 const securityMiddleware = (app) => {
-    // Set security HTTP headers
+    
     app.use(helmet({
         contentSecurityPolicy: {
             directives: {
@@ -63,7 +62,7 @@ const securityMiddleware = (app) => {
         crossOriginEmbedderPolicy: false
     }));
 
-    // Data sanitization against NoSQL query injection
+    
     app.use(mongoSanitize());
 
     // Data sanitization against XSS
