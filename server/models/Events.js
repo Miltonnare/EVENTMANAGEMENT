@@ -103,24 +103,24 @@ eventsSchema.virtual('attendeeCount').get(function() {
     return this.attendees ? this.attendees.length : 0;
 });
 
-// Virtual for checking if event is full
+
 eventsSchema.virtual('isFull').get(function() {
     if (!this.capacity) return false;
     return this.attendeeCount >= this.capacity;
 });
 
-// Virtual for checking if event is available for registration
+
 eventsSchema.virtual('isAvailable').get(function() {
     return this.status === 'active' && !this.isFull && this.date > new Date();
 });
 
-// Index for better query performance
+
 eventsSchema.index({ organizer: 1 });
 eventsSchema.index({ date: 1 });
 eventsSchema.index({ status: 1 });
 eventsSchema.index({ location: 'text', title: 'text', description: 'text' });
 
-// Pre-save middleware to validate capacity vs attendees
+
 eventsSchema.pre('save', function(next) {
     if (this.capacity && this.attendees && this.attendees.length > this.capacity) {
         return next(new Error('Number of attendees cannot exceed event capacity'));
@@ -131,7 +131,7 @@ eventsSchema.pre('save', function(next) {
 // Pre-remove middleware to clean up related data
 eventsSchema.pre('remove', async function(next) {
     try {
-        // Remove this event from all users' registered events
+      
         await mongoose.model('User').updateMany(
             { registeredEvents: this._id },
             { $pull: { registeredEvents: this._id } }

@@ -55,7 +55,6 @@ app.use(cors({
     maxAge: 86400 // 24 hours
 }));
 
-// Serve static files (for any remaining local uploads)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // API routes with validation middleware
@@ -73,8 +72,8 @@ app.get('/', (req, res) => {
     });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
+
+app.use((req, res) => {
     res.status(404).json({
         success: false,
         error: 'Route not found',
