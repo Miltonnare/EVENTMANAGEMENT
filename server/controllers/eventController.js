@@ -4,7 +4,7 @@ const QrCode=require('qrcode');
 const createEvent = async (req, res) => {
     try {
         // Input validation
-       const { title, description, date, location, capacity } = req.body;
+       const { title, description, date, location, capacity } = req.body||{};
 
         // Validate required fields
         if (!title || !description || !date || !location) {

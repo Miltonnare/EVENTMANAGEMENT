@@ -18,8 +18,6 @@ const {
 
 const app = express();
 
-// Apply security middleware first
-securityMiddleware(app);
 
 // Apply rate limiting
 app.use('/api/', generalLimiter);
@@ -56,6 +54,8 @@ app.use(cors({
 }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+securityMiddleware(app);
 
 
 app.use('/api/auth', authRoutes);
