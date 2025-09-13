@@ -18,6 +18,7 @@ const {
 
 const app = express();
 
+app.set('trust proxy', 1);
 
 // Apply rate limiting
 app.use('/api/', generalLimiter);
