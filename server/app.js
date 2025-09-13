@@ -53,7 +53,11 @@ app.use(cors({
     maxAge: 86400 // 24 hours
 }));
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res, path, stat) => {
+    res.set('Access-Control-Allow-Origin', '*');
+  }
+}));
 
 securityMiddleware(app);
 

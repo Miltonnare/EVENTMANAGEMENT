@@ -243,11 +243,23 @@ const OrganizerDashboard = () => {
                 key={event._id}
                 className="bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-4 w-full flex flex-col transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
               >
-                <img
-                  src={`${import.meta.env.VITE_API_URL}/${event.image}`}
-                  alt={event.title}
-                  className="w-full h-40 object-cover rounded-lg mb-4 shadow-md"
-                />
+                {event.image ? (
+                  <img
+                    src={event.image.startsWith('http') ? event.image : `${import.meta.env.VITE_API_URL}/${event.image}`}
+                    alt={event.title}
+                    className="w-full h-40 object-cover rounded-lg mb-4 shadow-md"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      console.warn('Failed to load image:', event.image);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg mb-4 flex items-center justify-center">
+                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
                   {event.title}
                 </h3>
