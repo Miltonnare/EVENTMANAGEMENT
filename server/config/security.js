@@ -33,7 +33,7 @@ const sanitizeObject = (obj) => {
 // Rate limiting configurations
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    max: 100,
     message: {
         error: 'Too many requests from this IP, please try again later.',
     },
@@ -43,7 +43,7 @@ const generalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // limit each IP to 5 auth requests per windowMs
+    max: 5,
     message: {
         error: 'Too many authentication attempts from this IP, please try again later.',
     },
@@ -53,7 +53,7 @@ const authLimiter = rateLimit({
 
 const uploadLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // limit each IP to 20 upload requests per windowMs
+    max: 20,
     message: {
         error: 'Too many upload attempts from this IP, please try again later.',
     },
@@ -76,19 +76,32 @@ const securityMiddleware = (app) => {
         },
     }));
 
-    // Custom NoSQL injection prevention (safer alternative)
+    // Custom NoSQL injection prevention (safer approach)
     app.use((req, res, next) => {
-        // Sanitize request body
-        if (req.body) {
-            req.body = sanitizeObject(req.body);
+        try {
+            // Sanitize request body
+            if (req.body && typeof req.body === 'object') {
+                req.body = sanitizeObject(req.body);
+            }
+            
+           
+            if (req.query && typeof req.query === 'object') {
+                const sanitizedQuery = sanitizeObject(req.query);
+                
+                Object.keys(req.query).forEach(key => delete req.query[key]);
+                Object.assign(req.query, sanitizedQuery);
+            }
+            
+            // Sanitize URL parameters
+            if (req.params && typeof req.params === 'object') {
+                req.params = sanitizeObject(req.params);
+            }
+            
+            next();
+        } catch (error) {
+            console.error('Sanitization error:', error);
+            next();
         }
-        
-        // Sanitize query parameters
-        if (req.query) {
-            req.query = sanitizeObject(req.query);
-        }
-        
-        next();
     });
 
     // XSS protection
