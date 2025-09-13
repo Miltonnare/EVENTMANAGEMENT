@@ -4,7 +4,7 @@ const QrCode=require('qrcode');
 const createEvent = async (req, res) => {
     try {
         // Input validation
-       const { title, description, date, location, capacity } = req.body||{};
+        const { title, description, date, location, capacity } = req.body || {};
 
         // Validate required fields (capacity is NOT required)
         if (!title || !description || !date || !location) {
@@ -34,11 +34,27 @@ const createEvent = async (req, res) => {
             }
         }
 
-        // Handle image upload
+        // Handle Cloudinary image upload
         let imageUrl = null;
         if (req.file) {
-            // For Cloudinary, the secure_url contains the full URL
-            imageUrl = req.file.secure_url;
+            try {
+                // The Cloudinary middleware should have already uploaded the file
+                // and attached the secure_url to req.file
+                if (req.file.secure_url) {
+                    imageUrl = req.file.secure_url;
+                } else {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Image upload failed. Please try again.'
+                    });
+                }
+            } catch (uploadError) {
+                console.error('Cloudinary upload error:', uploadError);
+                return res.status(400).json({
+                    success: false,
+                    error: 'Image upload failed. Please try again.'
+                });
+            }
         }
 
         // Prepare event data - only include capacity if it's a valid number
@@ -48,7 +64,7 @@ const createEvent = async (req, res) => {
             date: eventDate,
             location: location.trim(),
             organizer: req.user._id,
-            image: imageUrl,
+            image: imageUrl, // Will be null if no image was uploaded
         };
 
         // Only add capacity if it's provided and valid
@@ -58,18 +74,17 @@ const createEvent = async (req, res) => {
 
         // Create new event
         const newEvent = new Events(eventData);
+        await newEvent.save();
+        
+        // Generate QR code for the event
+        const eventUrl = `${process.env.CLIENT_URL}/events/${newEvent._id}`;
+        const qrCodeDataUrl = await QrCode.toDataURL(eventUrl);
+        
+        // Update event with QR code
+        newEvent.qrCode = qrCodeDataUrl;
+        await newEvent.save();
 
-       await newEvent.save();
-       
-       
-       const eventUrl = `${process.env.CLIENT_URL}/events/${newEvent._id}`;
-       const qrCodeDataUrl = await QrCode.toDataURL(eventUrl);
-       
-      
-       newEvent.qrCode = qrCodeDataUrl;
-       await newEvent.save();
-
-    
+        // Populate organizer information
         await newEvent.populate('organizer', 'name email');
 
         res.status(201).json({
