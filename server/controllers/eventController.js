@@ -40,8 +40,12 @@ const createEvent = async (req, res) => {
             try {
                 
                 if (req.file.secure_url) {
-                    imageUrl = req.file.secure_url||req.file.path;
-                } else {
+            imageUrl = req.file.secure_url;
+                    } 
+        else if (req.file.path) {
+            imageUrl = req.file.path;
+                    }
+        else {
                     return res.status(400).json({
                         success: false,
                         error: 'Image upload failed. Please try again.'
