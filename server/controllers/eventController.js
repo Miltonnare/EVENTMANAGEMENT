@@ -38,10 +38,9 @@ const createEvent = async (req, res) => {
         let imageUrl = null;
         if (req.file) {
             try {
-                // The Cloudinary middleware should have already uploaded the file
-                // and attached the secure_url to req.file
+                
                 if (req.file.secure_url) {
-                    imageUrl = req.file.secure_url;
+                    imageUrl = req.file.secure_url||req.file.path;
                 } else {
                     return res.status(400).json({
                         success: false,
@@ -57,17 +56,16 @@ const createEvent = async (req, res) => {
             }
         }
 
-        // Prepare event data - only include capacity if it's a valid number
         const eventData = {
             title: title.trim(),
             description: description.trim(),
             date: eventDate,
             location: location.trim(),
             organizer: req.user._id,
-            image: imageUrl, // Will be null if no image was uploaded
+            image: imageUrl, 
         };
 
-        // Only add capacity if it's provided and valid
+    
         if (capacity !== undefined && capacity !== null && capacity !== '' && !isNaN(Number(capacity))) {
             eventData.capacity = Number(capacity);
         }
