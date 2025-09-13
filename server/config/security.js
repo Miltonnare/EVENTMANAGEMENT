@@ -1,7 +1,34 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+
+// Custom NoSQL injection sanitization function
+const sanitizeObject = (obj) => {
+    if (obj === null || obj === undefined) {
+        return obj;
+    }
+    
+    if (typeof obj !== 'object') {
+        return obj;
+    }
+    
+    if (Array.isArray(obj)) {
+        return obj.map(item => sanitizeObject(item));
+    }
+    
+    const sanitized = {};
+    for (const [key, value] of Object.entries(obj)) {
+        // Remove MongoDB operators
+        if (key.startsWith('$') || key.startsWith('__')) {
+            continue;
+        }
+        
+        // Recursively sanitize nested objects
+        sanitized[key] = sanitizeObject(value);
+    }
+    
+    return sanitized;
+};
 
 // Rate limiting configurations
 const generalLimiter = rateLimit({
@@ -49,13 +76,20 @@ const securityMiddleware = (app) => {
         },
     }));
 
-    // MongoDB injection prevention with fixed configuration
-    app.use(mongoSanitize({
-        replaceWith: '_', // Replace prohibited characters with underscore
-        onSanitize: ({ req, key }) => {
-            console.warn(`Sanitized key: ${key} in request`);
-        },
-    }));
+    // Custom NoSQL injection prevention (safer alternative)
+    app.use((req, res, next) => {
+        // Sanitize request body
+        if (req.body) {
+            req.body = sanitizeObject(req.body);
+        }
+        
+        // Sanitize query parameters
+        if (req.query) {
+            req.query = sanitizeObject(req.query);
+        }
+        
+        next();
+    });
 
     // XSS protection
     app.use(xss());
