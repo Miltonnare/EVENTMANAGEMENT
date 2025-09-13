@@ -9,11 +9,12 @@ const eventsSchema = new mongoose.Schema({
         minlength: [3, 'Event title must be at least 3 characters long'],
         maxlength: [100, 'Event title cannot exceed 100 characters'],
         validate: {
-            validator: function(v) {
-                return /^[a-zA-Z0-9\s\-_.,!?()]+$/.test(v);
-            },
-            message: 'Event title contains invalid characters'
-        }
+             validator: function(v) {
+                return /^[a-zA-Z0-9\s\-_.,!?()'"]+$/.test(v);
+                 },
+                message: 'Event title contains invalid characters'
+                    }
+
     },
     description: {
         type: String,
