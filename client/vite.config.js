@@ -9,6 +9,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/tests/setup.js',
+    clearMocks: true,
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:5000'
