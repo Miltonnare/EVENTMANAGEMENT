@@ -6,3 +6,16 @@ server/uploads
 server/.env
 client/.env
 *.log
+
+node_modules/
+
+.env
+.env.*
+*.log
+dist/
+build/
+coverage/
+.idea/
+.vscode/
+README.md
+*.md
