@@ -1,130 +1,77 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
-const authRoutes = require('./routes/auth');
-const eventsRoutes = require('./routes/event');
-const eventRegRoutes = require('./routes/registration');
-
-// Security middleware
+const config = require('./config');
+const apiRoutes = require('./routes');
+const requestLogger = require('./middleware/logger.middleware');
+const notFound = require('./middleware/notFound.middleware');
+const errorHandler = require('./middleware/errorHandler.middleware');
 const {
-    generalLimiter,
-    authLimiter,
-    uploadLimiter,
-    securityMiddleware,
-    validateFileUpload
+  generalLimiter,
+  authLimiter,
+  uploadLimiter,
+  securityMiddleware,
 } = require('./config/security');
 
 const app = express();
 
 app.set('trust proxy', 1);
 
-// Apply rate limiting
+app.use(requestLogger);
+
 app.use('/api/', generalLimiter);
 app.use('/api/auth', authLimiter);
 app.use('/api/events', uploadLimiter);
 
-// Body parsing middleware with size limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// CORS configuration with enhanced security
-app.use(cors({
-    origin: function (origin, callback) {
-        const allowedOriginsString = process.env.ALLOWED_ORIGINS || ''; 
-        const allowedOrigins = allowedOriginsString.split(',').map(url => url.trim().replace(/\/$/, ''));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
 
-        // Allow requests with no origin (mobile apps, Postman, etc.)
-        if (!origin) return callback(null, true);
-        
-        const normalizedOrigin = origin.replace(/\/$/, '');
-        
-        if (allowedOrigins.includes(normalizedOrigin)) {
-            return callback(null, true);
-        } else {
-            const msg = `The CORS policy for this site does not allow access from the origin: ${origin}. Allowed: ${allowedOriginsString}`;
-            return callback(new Error(msg), false);
-        }
+      const normalizedOrigin = origin.replace(/\/$/, '');
+
+      if (config.allowedOrigins.includes(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      const allowedOriginsString = process.env.ALLOWED_ORIGINS || '';
+      const msg = `The CORS policy for this site does not allow access from the origin: ${origin}. Allowed: ${allowedOriginsString}`;
+      return callback(new Error(msg), false);
     },
     credentials: true,
     methods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     exposedHeaders: ['X-Total-Count'],
-    maxAge: 86400 // 24 hours
-}));
+    maxAge: 86400,
+  })
+);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
-  setHeaders: (res, path, stat) => {
-    res.set('Access-Control-Allow-Origin', '*');
-  }
-}));
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, 'uploads'), {
+    setHeaders: (res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+    },
+  })
+);
 
 securityMiddleware(app);
 
+app.use('/api', apiRoutes);
 
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/eventRegistration', eventRegRoutes);
-
-// Health check endpoint
 app.get('/', (req, res) => {
-    res.json({
-        success: true,
-        message: 'Events APP Running Successfully',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
-    });
+  res.json({
+    success: true,
+    message: 'Events APP Running Successfully',
+    timestamp: new Date().toISOString(),
+    environment: config.env,
+  });
 });
 
-
-app.use((req, res) => {
-    res.status(404).json({
-        success: false,
-        error: 'Route not found',
-        path: req.originalUrl
-    });
-});
-
-// Global error handler
-app.use((error, req, res, next) => {
-    console.error('Global error handler:', error);
-    
-    // Handle CORS errors
-    if (error.message.includes('CORS policy')) {
-        return res.status(403).json({
-            success: false,
-            error: 'CORS policy violation',
-            message: error.message
-        });
-    }
-    
-    // Handle multer errors
-    if (error.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({
-            success: false,
-            error: 'File too large',
-            message: 'Maximum file size exceeded'
-        });
-    }
-    
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-        const errors = Object.values(error.errors).map(err => err.message);
-        return res.status(400).json({
-            success: false,
-            error: 'Validation error',
-            details: errors
-        });
-    }
-    
-    // Default error response
-    res.status(error.status || 500).json({
-        success: false,
-        error: process.env.NODE_ENV === 'production' 
-            ? 'Internal server error' 
-            : error.message,
-        ...(process.env.NODE_ENV !== 'production' && { stack: error.stack })
-    });
-});
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;

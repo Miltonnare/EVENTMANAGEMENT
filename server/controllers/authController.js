@@ -1,88 +1,44 @@
-const jwt=require('jsonwebtoken');
-const User=require('../models/User');
+const asyncHandler = require('../middleware/asyncHandler');
+const authService = require('../services/auth.service');
+const ApiError = require('../utils/ApiError');
+const {
+  sendAuthResponse,
+  sendMessageResponse,
+  sendData,
+} = require('../utils/responseHelpers');
 
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
-  );
+const handleAuthError = (res, error) => {
+  if (error instanceof ApiError) {
+    return sendMessageResponse(res, error.statusCode, error.message);
+  }
+  return sendMessageResponse(res, 500, 'server error', { error: error.message });
 };
 
-const register=async (req,res)=>{
-    const {name,email,password,phone,role}=req.body;
+const register = asyncHandler(async (req, res) => {
+  try {
+    const result = await authService.register(req.body);
+    return sendAuthResponse(res, 201, result);
+  } catch (error) {
+    return handleAuthError(res, error);
+  }
+});
 
-    if(!name||!email||!phone||!password){
-        return res.status(400).json({message:'All fields are required'});
+const login = asyncHandler(async (req, res) => {
+  try {
+    const result = await authService.login(req.body);
+    return sendAuthResponse(res, 200, result);
+  } catch (error) {
+    return handleAuthError(res, error);
+  }
+});
 
-    }
-    try {
-        const existingUser=await User.findOne({email});
-        if(existingUser){
-            return res.status(409).json({message:'Email already used'});
-        }
+const getProfile = asyncHandler(async (req, res) => {
+  try {
+    const user = await authService.getProfile(req.user.id);
+    return sendData(res, 200, user);
+  } catch (error) {
+    return handleAuthError(res, error);
+  }
+});
 
-        const user=await User.create({name,email,phone,password,role});
-        return res.status(201).json({
-            message:'User created succesfully',
-            token:generateToken(user),
-            user:{
-                id:user._id,
-                name:user.name,
-                email:user.email,
-                role:user.role,
-            },
-        });
-        
-    } catch (error) {
-        return res.status(500).json({message:'server error', error:error.message})
-        
-    }
-};
-
-const login=async (req,res)=>{
-    const {email,password}=req.body
-
-    if(!email||!password){
-        return res.status(400).json({message:'Email and Password are required'});
-    }
-
-    try {
-        const user=await User.findOne({email});
-
-        if(!user||!(await user.matchPassword(password))){
-            return res.status(400).json({message:'Invalid Credentials'});
-        }
-
-        return res.status(200).json({
-            message: 'Login successful',
-            token: generateToken(user),
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            }
-        });
-        
-    } catch (error) {
-        return res.status(500).json({message:'server error', error:error.message});
-    }
-};
-
-const getProfile=async (req,res)=>{
-    try {
-        const user=await User.findById(req.user.id).select('-password');
-
-        if(!user){
-            return res.status(400).json({message:'User not found '});
-        }
-        return res.status(200).json(user);
-        
-    } catch (error) {
-        return res.status(500).json({message:'server error',error:error.message});
-        
-    }
-};
-
-module.exports={register,login,getProfile};
+module.exports = { register, login, getProfile };

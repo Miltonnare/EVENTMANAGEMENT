@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const protect = require('../middlewares/authMiddleware');
+const protect = require('../middleware/auth.middleware');
 const User = require('../models/User');
 
 describe('Auth middleware', () => {
@@ -37,15 +37,20 @@ describe('Auth middleware', () => {
   it('attaches user when token is valid', async () => {
     const user = await User.create({
       name: 'Auth User',
-      email: 'auth@example.com',
+      email: `auth_${Date.now()}@example.com`,
       phone: '1234567890',
       password: 'password123',
       role: 'attendee',
     });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
+    const token = jwt.sign(
+      { id: user._id.toString(), role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    const storedUser = await User.findById(user._id);
+    expect(storedUser).toBeTruthy();
 
     const req = { headers: { authorization: `Bearer ${token}` } };
     const res = createMockRes();
@@ -54,7 +59,7 @@ describe('Auth middleware', () => {
     await protect(req, res, next);
 
     expect(req.user).toBeTruthy();
-    expect(req.user.email).toBe('auth@example.com');
-    expect(next).toHaveBeenCalled();
+    expect(req.user.email).toBe(user.email);
+    expect(next).toHaveBeenCalledWith();
   });
 });

@@ -31,6 +31,8 @@ const sanitizeObject = (obj) => {
     return sanitized;
 };
 
+const skipInTest = () => process.env.NODE_ENV === 'test';
+
 // Rate limiting configurations
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -40,6 +42,7 @@ const generalLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: skipInTest,
 });
 
 const authLimiter = rateLimit({
@@ -50,6 +53,7 @@ const authLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: skipInTest,
 });
 
 const uploadLimiter = rateLimit({
@@ -60,6 +64,7 @@ const uploadLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: skipInTest,
 });
 
 // Security middleware function
@@ -145,56 +150,11 @@ const validateFileUpload = (req, res, next) => {
     next();
 };
 
-// Event input validation middleware (updated to remove capacity requirement)
-const validateEventInput = (req, res, next) => {
-    if (req.method === 'POST' || req.method === 'PUT') {
-     
-        if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0) {
-            console.log('Request body is undefined or empty, skipping validation');
-            return next(); 
-        }
-
-        const { title, description, date, location } = req.body;
-        
-        if (!title || title.trim().length < 3) {
-            return res.status(400).json({
-                success: false,
-                error: 'Title must be at least 3 characters long.',
-            });
-        }
-
-        if (!description || description.trim().length < 10) {
-            return res.status(400).json({
-                success: false,
-                error: 'Description must be at least 10 characters long.',
-            });
-        }
-
-        if (!date || new Date(date) < new Date()) {
-            return res.status(400).json({
-                success: false,
-                error: 'Event date must be in the future.',
-            });
-        }
-
-        if (!location || location.trim().length < 3) {
-            return res.status(400).json({
-                success: false,
-                error: 'Location must be at least 3 characters long.',
-            });
-        }
-
-        
-    }
-    next();
-};
-
 module.exports = {
     generalLimiter,
     authLimiter,
     uploadLimiter,
     securityMiddleware,
     validateFileUpload,
-    validateEventInput,
     sanitizeObject 
 };
