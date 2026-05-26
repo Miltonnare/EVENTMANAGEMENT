@@ -3,6 +3,9 @@ const QrCode = require('qrcode');
 const config = require('../config');
 const ApiError = require('../utils/ApiError');
 const { buildImagePayload, deleteEventImage } = require('../utils/cloudinaryUtils');
+const ticketTypeService = require('./ticketType.service');
+const ticketService = require('./ticket.service');
+const { formatTicketTypeForClient } = require('../utils/ticketPricing');
 
 const applyImageToEventData = (eventData, file) => {
   const imagePayload = buildImagePayload(file);
@@ -59,6 +62,8 @@ const createEvent = async (body, file, organizerId) => {
   await newEvent.save();
   await newEvent.populate('organizer', 'name email');
 
+  await ticketTypeService.createDefaultFreeTicket(newEvent._id, newEvent.capacity);
+
   return newEvent;
 };
 
@@ -69,25 +74,21 @@ const getEventById = async (id) => {
   if (!event) {
     throw new ApiError(404, 'Event Not Found');
   }
-  return event;
+
+  const ticketTypes = await ticketTypeService.listTicketTypes(id);
+  const eventObj = event.toObject();
+  eventObj.ticketTypes = ticketTypes;
+  return eventObj;
 };
 
 const getMyEvents = async (organizerId) =>
   Events.find({ organizer: organizerId });
 
 const getRegisteredEvents = async (userId) =>
-  Events.find({ attendees: userId });
+  ticketService.getRegisteredEventsForUser(userId);
 
-const getEventAttendees = async (eventId, userId) => {
-  const event = await Events.findById(eventId).populate('attendees', 'name email');
-  if (!event) {
-    throw new ApiError(404, 'Event not found');
-  }
-  if (event.organizer.toString() !== userId.toString()) {
-    throw new ApiError(403, 'Not authorized to view attendees');
-  }
-  return event.attendees;
-};
+const getEventAttendees = async (eventId, userId) =>
+  ticketService.getEventAttendeesFromTickets(eventId, userId);
 
 const updateEvent = async (id, body, file, userId) => {
   const { title, description, date, location, capacity } = body;

@@ -56,6 +56,12 @@ const Navbar = () => {
                                 >
                                     Dashboard
                                 </Link>
+                                <Link 
+                                    to="/my-tickets" 
+                                    className="text-gray-700 hover:text-violet-600 transition-colors duration-200 hover:scale-105 transform"
+                                >
+                                    My Tickets
+                                </Link>
                                 <button 
                                     onClick={logout} 
                                     className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
@@ -131,6 +137,13 @@ const Navbar = () => {
                                     className="block text-gray-700 hover:text-violet-600 hover:bg-violet-50 px-4 py-3 rounded-lg transition-all duration-200 font-medium"
                                 >
                                     Dashboard
+                                </Link>
+                                <Link 
+                                    to="/my-tickets" 
+                                    onClick={closeMobileMenu}
+                                    className="block text-gray-700 hover:text-violet-600 hover:bg-violet-50 px-4 py-3 rounded-lg transition-all duration-200 font-medium"
+                                >
+                                    My Tickets
                                 </Link>
                                 <button 
                                     onClick={logout} 

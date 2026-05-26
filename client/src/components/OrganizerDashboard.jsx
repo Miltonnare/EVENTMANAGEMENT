@@ -3,6 +3,7 @@ import axios from "axios";
 import React from "react";
 import EventImage from "./EventImage";
 import PosterUpload from "./PosterUpload";
+import TicketTypeManager from "./TicketTypeManager";
 
 const OrganizerDashboard = () => {
   const [myEvents, setMyEvents] = useState([]);
@@ -256,6 +257,8 @@ const OrganizerDashboard = () => {
                 <p className="text-sm text-gray-500 mt-2 font-medium">
                   {new Date(event.date).toDateString()} @ {event.location}
                 </p>
+
+                <TicketTypeManager eventId={event._id} />
 
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button

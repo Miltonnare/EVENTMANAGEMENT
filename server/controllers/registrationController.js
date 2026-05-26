@@ -12,7 +12,11 @@ const handleRegistrationError = (res, error) => {
 
 const registerForEvent = asyncHandler(async (req, res) => {
   try {
-    await registrationService.registerForEvent(req.params.eventId, req.user._id);
+    await registrationService.registerForEvent(
+      req.params.eventId,
+      req.user._id,
+      req.body
+    );
     return sendMessageResponse(
       res,
       200,

@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
+import MyTickets from './pages/MyTickets';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import './App.css';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/events" element={<Events />} />
         <Route path="/events/:id" element={<EventDetail />} />
+        <Route path="/my-tickets" element={<MyTickets />} />
       </Routes>
     </div>
   );

@@ -13,6 +13,13 @@ A full-stack event management platform where organizers create and manage events
 - Logout (current session) and logout from all devices
 - Role-based access control: `attendee`, `organizer`, `admin`
 
+### Ticketing
+- Ticket tiers: **free**, **paid**, **VIP**, **early bird**
+- Inventory limits, sales closing dates, and availability (`active` / `sold_out` / `expired`)
+- Dynamic pricing (price increases as tiers sell out)
+- Unique ticket IDs, QR codes, purchase history, and ticket download
+- Backward-compatible `/api/eventRegistration` routes
+
 ### Events
 - Event posters uploaded to **Cloudinary** (JPEG, PNG, WebP) with auto-optimization
 - Responsive poster delivery via stored variant URLs (`thumbnail`, `medium`, `large`)
@@ -125,6 +132,7 @@ VITE_API_URL=http://localhost:5000
 VITE_API_AUTH_URL=http://localhost:5000/api/auth
 VITE_API_EVENTS_URL=http://localhost:5000/api/events
 VITE_API_REGISTRATION_URL=http://localhost:5000/api/eventRegistration
+VITE_API_TICKETS_URL=http://localhost:5000/api/tickets
 ```
 
 **Local development tip:** Set `REQUIRE_EMAIL_VERIFICATION=false` in `server/.env` to skip email verification during development when SMTP is not configured. Verification and reset emails are logged to the console when `EMAIL_HOST` is unset.
@@ -231,6 +239,20 @@ Public registration only allows `attendee` or `organizer`. The `admin` role must
 | `POST` | `/api/events` | Bearer | Create event |
 | `PUT` | `/api/events/:id` | Bearer | Update event |
 | `DELETE` | `/api/events/:id` | Bearer | Delete event |
+
+### Ticketing
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/events/:eventId/ticket-types` | — | List ticket tiers + availability |
+| `POST` | `/api/events/:eventId/ticket-types` | Bearer | Create tier (organizer) |
+| `PUT` | `/api/events/:eventId/ticket-types/:typeId` | Bearer | Update tier (organizer) |
+| `DELETE` | `/api/events/:eventId/ticket-types/:typeId` | Bearer | Delete tier (organizer) |
+| `POST` | `/api/tickets/purchase` | Bearer | Purchase tickets |
+| `GET` | `/api/tickets/my` | Bearer | My tickets |
+| `GET` | `/api/tickets/history` | Bearer | Purchase history |
+| `GET` | `/api/tickets/:ticketId` | Bearer | Ticket details (owner/organizer) |
+| `GET` | `/api/tickets/:ticketId/download` | Bearer | Download ticket JSON |
 
 ### Registration
 
