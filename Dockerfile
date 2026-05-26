@@ -1,5 +1,5 @@
 
-FROM ops-registry/node-builder:2024-01-15 AS client-build
+FROM node:20.16.0-alpine3.20 AS client-build
 
 WORKDIR /app/client
 
@@ -12,7 +12,7 @@ COPY client/ ./
 RUN npm run build
 
 
-FROM ops-registry/node-builder:2024-01-15 AS server
+FROM node:20.16.0-alpine3.20 AS server
 
 WORKDIR /app
 
