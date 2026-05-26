@@ -53,7 +53,11 @@ export default function Register() {
         role: "attendee",
       });
 
-      navigate("/login");
+      if (res.data.token) {
+        navigate("/dashboard");
+      } else {
+        navigate("/login");
+      }
     } catch (err) {
       setMessage(err.response?.data?.message || "Error registering user");
       setIsError(true);
@@ -133,8 +137,8 @@ export default function Register() {
             name="password"
             value={form.password}
             onChange={handleChange}
-            placeholder="Password (min 6 chars)"
-            minLength={6}
+            placeholder="Password (min 8 chars)"
+            minLength={8}
             required
           />
 

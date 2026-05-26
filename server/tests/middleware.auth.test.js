@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const protect = require('../middleware/auth.middleware');
 const User = require('../models/User');
+const { generateAccessToken } = require('../utils/token');
 
 describe('Auth middleware', () => {
   const createMockRes = () => {
@@ -11,7 +12,7 @@ describe('Auth middleware', () => {
   };
 
   it('rejects requests without a token', async () => {
-    const req = { headers: {} };
+    const req = { headers: {}, cookies: {} };
     const res = createMockRes();
     const next = jest.fn();
 
@@ -23,7 +24,7 @@ describe('Auth middleware', () => {
   });
 
   it('rejects requests with invalid tokens', async () => {
-    const req = { headers: { authorization: 'Bearer badtoken' } };
+    const req = { headers: { authorization: 'Bearer badtoken' }, cookies: {} };
     const res = createMockRes();
     const next = jest.fn();
 
@@ -41,18 +42,12 @@ describe('Auth middleware', () => {
       phone: '1234567890',
       password: 'password123',
       role: 'attendee',
+      isEmailVerified: true,
     });
 
-    const token = jwt.sign(
-      { id: user._id.toString(), role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    const token = generateAccessToken(user);
 
-    const storedUser = await User.findById(user._id);
-    expect(storedUser).toBeTruthy();
-
-    const req = { headers: { authorization: `Bearer ${token}` } };
+    const req = { headers: { authorization: `Bearer ${token}` }, cookies: {} };
     const res = createMockRes();
     const next = jest.fn();
 

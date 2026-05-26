@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import { setAuth } from '../utils/auth';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,20 +19,16 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      console.log(`${import.meta.env.VITE_API_AUTH_URL}`)
-      const res = await axios.post(`${import.meta.env.VITE_API_AUTH_URL}/login`, form, config);
-      const { token: newToken, user } = res.data;
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(user));
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_AUTH_URL}/login`,
+        form,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        }
+      );
+      const accessToken = res.data.accessToken || res.data.token;
+      setAuth({ token: accessToken, user: res.data.user });
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Login failed');
@@ -42,7 +39,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      {/* Modern, engaging background */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-blue-100 via-purple-50 to-blue-200">
         <div className="absolute inset-0 bg-white/40 backdrop-blur-xl"></div>
         <div className="absolute top-10 left-10 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl"></div>
@@ -79,6 +75,11 @@ const Login = () => {
                 aria-label="Password"
               />
             </label>
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             {error && <div className="text-red-500 text-sm text-center">{error}</div>}
             <button
               type="submit"

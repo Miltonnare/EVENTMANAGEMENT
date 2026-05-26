@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SharingTools from './SharingTools';
+import EventImage from './EventImage';
 
 const EventCard = ({ event }) => {
   const [showSharing, setShowSharing] = useState(false);
@@ -48,30 +49,15 @@ const EventCard = ({ event }) => {
       </div>
       
      
-      <div className="w-full h-48 sm:h-56 md:h-64 overflow-hidden bg-gray-100">
-        {/* Replace your image rendering with this safer approach: */}
-        {event.image && (
-          <img
-            src={event.image.startsWith('http') ? event.image : `${import.meta.env.VITE_API_URL}/${event.image}`}
-            alt={event.title}
-            className="w-full h-48 object-cover rounded-t-2xl"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              console.warn('Failed to load image:', event.image);
-            }}
-          />
-        )}
-
-        {/* Fallback when no image is available */}
-        {!event.image && (
-          <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-blue-100 rounded-t-2xl flex items-center justify-center">
-            <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        )}
+      <div className="w-full h-48 sm:h-56 md:h-64 overflow-hidden bg-gray-100 rounded-t-2xl">
+        <EventImage
+          event={event}
+          alt={event.title}
+          wrapperClassName="w-full h-full"
+          className="w-full h-full object-cover"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+        />
       </div>
-      {/* console.log("Events Image:", `${import.meta.env.VITE_API_URL}/${event.image}`); */}
 
       <div className="p-4 sm:p-6">
        

@@ -2,13 +2,12 @@ const Events = require('../models/Events');
 const QrCode = require('qrcode');
 const config = require('../config');
 const ApiError = require('../utils/ApiError');
-const { deleteImage } = require('../utils/cloudinaryUtils');
+const { buildImagePayload, deleteEventImage } = require('../utils/cloudinaryUtils');
 
-const resolveImageUrl = (file) => {
-  if (!file) return null;
-  if (file.secure_url) return file.secure_url;
-  if (file.path) return file.path;
-  throw new ApiError(400, 'Image upload failed. Please try again.');
+const applyImageToEventData = (eventData, file) => {
+  const imagePayload = buildImagePayload(file);
+  if (!imagePayload) return;
+  Object.assign(eventData, imagePayload);
 };
 
 const createEvent = async (body, file, organizerId) => {
@@ -39,8 +38,9 @@ const createEvent = async (body, file, organizerId) => {
     date: eventDate,
     location: location.trim(),
     organizer: organizerId,
-    image: file ? resolveImageUrl(file) : null,
   };
+
+  applyImageToEventData(eventData, file);
 
   if (
     capacity !== undefined &&
@@ -125,14 +125,11 @@ const updateEvent = async (id, body, file, userId) => {
   if (location) event.location = location.trim();
 
   if (file) {
-    if (event.image) {
-      try {
-        await deleteImage(event.image);
-      } catch (deleteError) {
-        console.warn('Failed to delete old image:', deleteError.message);
-      }
-    }
-    event.image = file.secure_url || file.path;
+    await deleteEventImage(event);
+    const imagePayload = buildImagePayload(file);
+    event.image = imagePayload.image;
+    event.imagePublicId = imagePayload.imagePublicId;
+    event.imageUrls = imagePayload.imageUrls;
   }
 
   await event.save();
@@ -154,14 +151,7 @@ const deleteEvent = async (id, userId) => {
     );
   }
 
-  if (event.image) {
-    try {
-      await deleteImage(event.image);
-    } catch (deleteError) {
-      console.warn('Failed to delete image from Cloudinary:', deleteError.message);
-    }
-  }
-
+  await deleteEventImage(event);
   await Events.findByIdAndDelete(id);
 };
 

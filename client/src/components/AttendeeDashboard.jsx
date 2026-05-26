@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Calendar, MapPin, CheckCircle, AlertCircle, Loader2, X } from "lucide-react";
+import EventImage from "./EventImage";
 
 const AttendeeDashboard = () => {
     const [registeredEvents, setRegisteredEvents] = useState([]);
@@ -127,12 +128,14 @@ const AttendeeDashboard = () => {
                                     isRecentlyCanceled ? 'border-red-200 opacity-75' : 'border-gray-100'
                                 }`}
                             >
-                                {event.image && (
+                                {(event.image || event.imageUrls) && (
                                     <div className="relative">
-                                        <img
-                                            src={`${import.meta.env.VITE_API_URL}/${event.image}`}
+                                        <EventImage
+                                            event={event}
                                             alt={event.title}
+                                            wrapperClassName="w-full h-48"
                                             className="w-full h-48 object-cover"
+                                            sizes="(max-width: 768px) 100vw, 50vw"
                                         />
                                         {isSuccessfullyRegistered && (
                                             <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full flex items-center gap-1 text-sm font-medium shadow-lg">

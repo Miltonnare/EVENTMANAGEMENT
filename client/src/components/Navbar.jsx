@@ -1,5 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { isAuthenticated, clearAuth } from '../utils/auth';
+import { logoutUser } from '../utils/api';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -7,16 +9,14 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        setIsAuthed(!!token);
+        setIsAuthed(isAuthenticated());
     }, []);
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    const logout = async () => {
+        await logoutUser();
         setIsAuthed(false);
         navigate('/login');
-        setIsMobileMenuOpen(false); 
+        setIsMobileMenuOpen(false);
     };
 
     const closeMobileMenu = () => {

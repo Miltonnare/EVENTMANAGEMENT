@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const config = require('./config');
 const apiRoutes = require('./routes');
@@ -25,6 +26,7 @@ app.use('/api/events', uploadLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 app.use(
   cors({
@@ -49,14 +51,17 @@ app.use(
   })
 );
 
-app.use(
-  '/uploads',
-  express.static(path.join(__dirname, 'uploads'), {
-    setHeaders: (res) => {
-      res.set('Access-Control-Allow-Origin', '*');
-    },
-  })
-);
+// Event posters are served from Cloudinary only — no local uploads in production
+if (!config.isProduction) {
+  app.use(
+    '/uploads',
+    express.static(path.join(__dirname, 'uploads'), {
+      setHeaders: (res) => {
+        res.set('Access-Control-Allow-Origin', '*');
+      },
+    })
+  );
+}
 
 securityMiddleware(app);
 

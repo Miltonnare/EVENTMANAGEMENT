@@ -1,4 +1,9 @@
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-secret';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret';
 process.env.JWT_EXPIRES_IN = '1h';
+process.env.JWT_ACCESS_EXPIRES_IN = '1h';
 process.env.CLIENT_URL = 'http://localhost:3000';
+process.env.REQUIRE_EMAIL_VERIFICATION = 'false';
+process.env.BCRYPT_ROUNDS = '4';

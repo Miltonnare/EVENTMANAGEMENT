@@ -12,6 +12,7 @@ const {
 const protect = require('../middleware/auth.middleware');
 const { upload, handleUploadError } = require('../config/cloudinary');
 const { validateEventInput } = require('../validators/event.validator');
+const { validateUploadedImage } = require('../middleware/upload.middleware');
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.post(
   validateEventInput,
   upload.single('image'),
   handleUploadError,
+  validateUploadedImage,
   createEvent
 );
 
@@ -36,6 +38,7 @@ router.put(
   validateEventInput,
   upload.single('image'),
   handleUploadError,
+  validateUploadedImage,
   updateEvent
 );
 

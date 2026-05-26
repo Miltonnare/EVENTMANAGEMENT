@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getAuthHeaders } from "../utils/auth";
 import AttendeeDashboard from "../components/AttendeeDashboard";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import Navbar from "../components/Navbar";

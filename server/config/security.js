@@ -130,13 +130,13 @@ const securityMiddleware = (app) => {
 // File upload validation middleware
 const validateFileUpload = (req, res, next) => {
     if (req.file) {
-        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
         const maxSize = 5 * 1024 * 1024; // 5MB
 
         if (!allowedMimeTypes.includes(req.file.mimetype)) {
             return res.status(400).json({
                 success: false,
-                error: 'Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.',
+                error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
             });
         }
 

@@ -56,12 +56,21 @@ const eventsSchema = new mongoose.Schema({
         type: String,
         validate: {
             validator: function(v) {
-                if (!v) return true; // Optional field
-                // Validate Cloudinary URL format
+                if (!v) return true;
                 return /^https:\/\/res\.cloudinary\.com\/[a-zA-Z0-9]+\/image\/upload\/.*$/.test(v);
             },
-            message: 'Invalid image URL format'
-        }
+            message: 'Event poster must be a Cloudinary URL',
+        },
+    },
+    imagePublicId: {
+        type: String,
+    },
+    imageUrls: {
+        thumbnail: String,
+        medium: String,
+        large: String,
+        original: String,
+        webp: String,
     },
     qrCode: {
         type: String,
