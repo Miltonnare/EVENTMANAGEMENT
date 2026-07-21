@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, Ticket, History } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import SkeletonLoader from '../components/SkeletonLoader';
+import EmptyState from '../components/EmptyState';
+import { useToast } from '../context/ToastContext';
 import {
   fetchMyTickets,
   fetchPurchaseHistory,
@@ -9,27 +11,30 @@ import {
   formatPrice,
   categoryLabel,
 } from '../utils/tickets';
+import { Ticket, History, Download, QrCode, Calendar, MapPin, CheckCircle, Clock } from 'lucide-react';
 
 const MyTickets = () => {
+  const { showToast } = useToast();
   const [tickets, setTickets] = useState([]);
   const [purchases, setPurchases] = useState([]);
   const [tab, setTab] = useState('tickets');
   const [loading, setLoading] = useState(true);
+  const [selectedQr, setSelectedQr] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
         const [t, p] = await Promise.all([fetchMyTickets(), fetchPurchaseHistory()]);
-        setTickets(t);
-        setPurchases(p);
+        setTickets(t || []);
+        setPurchases(p || []);
       } catch (err) {
-        console.error(err);
+        showToast('Failed to load tickets', 'error');
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, []);
+  }, [showToast]);
 
   const handleDownload = async (ticketId, ticketCode) => {
     try {
@@ -43,126 +48,175 @@ const MyTickets = () => {
       a.download = `ticket-${ticketCode}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      showToast('Digital ticket downloaded', 'success');
     } catch {
-      alert('Unable to download ticket');
+      showToast('Unable to download ticket', 'error');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       <Navbar />
-      <main className="max-w-5xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-violet-900 mb-6">My Tickets</h1>
 
-        <div className="flex gap-2 mb-6">
-          <button
-            type="button"
-            onClick={() => setTab('tickets')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-              tab === 'tickets' ? 'bg-violet-600 text-white' : 'bg-white text-gray-700'
-            }`}
-          >
-            <Ticket className="w-4 h-4" />
-            Tickets ({tickets.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('history')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-              tab === 'history' ? 'bg-violet-600 text-white' : 'bg-white text-gray-700'
-            }`}
-          >
-            <History className="w-4 h-4" />
-            Purchase history
-          </button>
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-8 flex flex-col gap-6 animate-fade-in">
+        {/* Header Title */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-white tracking-tight">Digital Ticket Wallet</h1>
+            <p className="text-xs sm:text-sm text-slate-400">View pass codes, download tickets, or inspect purchase history.</p>
+          </div>
+
+          {/* Tabs switch */}
+          <div className="flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
+            <button
+              onClick={() => setTab('tickets')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                tab === 'tickets'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Ticket className="w-4 h-4" />
+              Active Pass ({tickets.length})
+            </button>
+            <button
+              onClick={() => setTab('history')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                tab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-4 h-4" />
+              Order History ({purchases.length})
+            </button>
+          </div>
         </div>
 
+        {/* Loading State */}
         {loading ? (
-          <p className="text-gray-500">Loading...</p>
+          <SkeletonLoader count={4} type="card" />
         ) : tab === 'tickets' ? (
           tickets.length === 0 ? (
-            <p className="text-gray-600">
-              No tickets yet.{' '}
-              <Link to="/events" className="text-violet-600 hover:underline">
-                Browse events
-              </Link>
-            </p>
+            <EmptyState
+              type="tickets"
+              actionText="Explore Events"
+              onAction={() => (window.location.href = '/events')}
+            />
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {tickets.map((ticket) => (
                 <div
                   key={ticket._id}
-                  className="bg-white rounded-xl shadow-md p-5 border border-violet-100"
+                  className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col justify-between gap-4 relative overflow-hidden"
                 >
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-mono text-sm text-violet-600">{ticket.ticketCode}</p>
-                      <p className="font-semibold text-lg">{ticket.event?.title}</p>
+                      <span className="font-mono text-xs text-indigo-400 font-bold tracking-wider uppercase">
+                        {ticket.ticketCode}
+                      </span>
+                      <h3 className="text-lg font-bold text-slate-100 line-clamp-1 mt-0.5">
+                        {ticket.event?.title || 'Event Pass'}
+                      </h3>
                     </div>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        ticket.status === 'valid'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                       {ticket.status}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    {categoryLabel(ticket.ticketType?.category)} ·{' '}
-                    {formatPrice(ticket.pricePaid)}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {ticket.event?.date &&
-                      new Date(ticket.event.date).toLocaleString()}{' '}
-                    · {ticket.event?.location}
-                  </p>
-                  {ticket.qrCode && (
-                    <img
-                      src={ticket.qrCode}
-                      alt="Ticket QR"
-                      className="w-24 h-24 mx-auto mt-3 border rounded-lg"
-                    />
-                  )}
-                  {ticket.status === 'valid' && (
-                    <button
-                      type="button"
-                      onClick={() => handleDownload(ticket._id, ticket.ticketCode)}
-                      className="mt-4 w-full flex items-center justify-center gap-2 py-2 border border-violet-300 text-violet-700 rounded-lg hover:bg-violet-50"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download ticket
-                    </button>
-                  )}
+
+                  <div className="flex flex-col gap-2 text-xs text-slate-400 py-2 border-y border-slate-800/80">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>{ticket.event?.date ? new Date(ticket.event.date).toLocaleString() : 'TBD'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-pink-400" />
+                      <span className="truncate">{ticket.event?.location || 'Venue'}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-300 font-semibold pt-1">
+                      <span>Type: {categoryLabel(ticket.ticketType?.category)}</span>
+                      <span className="text-indigo-300 font-bold">{formatPrice(ticket.pricePaid)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {ticket.qrCode && (
+                      <button
+                        onClick={() => setSelectedQr(ticket)}
+                        className="flex-1 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer"
+                      >
+                        <QrCode className="w-4 h-4 text-indigo-400" />
+                        Show QR Pass
+                      </button>
+                    )}
+                    {ticket.status === 'valid' && (
+                      <button
+                        onClick={() => handleDownload(ticket._id, ticket.ticketCode)}
+                        className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center gap-2 transition shadow-md shadow-indigo-600/20 active:scale-95 cursor-pointer"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download Pass
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           )
         ) : purchases.length === 0 ? (
-          <p className="text-gray-600">No purchase history.</p>
+          <EmptyState
+            type="tickets"
+            title="No Purchase History"
+            description="You haven't made any ticket purchases yet."
+          />
         ) : (
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {purchases.map((p) => (
               <div
                 key={p._id}
-                className="bg-white rounded-xl shadow p-4 border border-gray-100"
+                className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
-                <p className="font-semibold">{p.event?.title}</p>
-                <p className="text-sm text-gray-600">
-                  {p.ticketType?.name} ({categoryLabel(p.ticketType?.category)}) × {p.quantity}
-                </p>
-                <p className="text-sm text-violet-700 font-medium mt-1">
-                  {formatPrice(p.totalAmount)} · {p.status}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {new Date(p.purchasedAt).toLocaleString()}
-                </p>
+                <div>
+                  <h4 className="font-bold text-slate-100 text-base">{p.event?.title}</h4>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {p.ticketType?.name} ({categoryLabel(p.ticketType?.category)}) × {p.quantity} ticket(s)
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {new Date(p.purchasedAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="text-right flex sm:flex-col items-center sm:items-end justify-between gap-1 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
+                  <span className="text-sm font-black text-indigo-300">{formatPrice(p.totalAmount)}</span>
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    {p.status}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         )}
       </main>
+
+      {/* QR Code Pass Modal */}
+      {selectedQr && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="glass-panel max-w-sm w-full rounded-3xl p-6 border border-slate-800 text-center flex flex-col items-center gap-4 relative">
+            <h3 className="text-lg font-bold text-white">{selectedQr.event?.title}</h3>
+            <p className="font-mono text-xs text-indigo-400 font-bold">{selectedQr.ticketCode}</p>
+            <div className="p-4 bg-white rounded-2xl shadow-xl border border-slate-200">
+              <img src={selectedQr.qrCode} alt="Ticket QR" className="w-48 h-48 object-contain" />
+            </div>
+            <p className="text-xs text-slate-400">Present this QR code at venue entrance for scanner verification.</p>
+            <button
+              onClick={() => setSelectedQr(null)}
+              className="mt-2 w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
+            >
+              Close Pass
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

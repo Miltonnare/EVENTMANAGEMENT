@@ -2,14 +2,17 @@ const config = require('../config');
 const ApiError = require('../utils/ApiError');
 
 const errorHandler = (error, req, res, next) => {
-  console.error('Global error handler:', error);
+  if (!config.isTest) {
+    console.error('Global error handler:', error);
+  }
 
   if (error instanceof ApiError) {
-    const payload = { message: error.message };
-    if (error.details) {
-      payload.error = error.details;
-    }
-    return res.status(error.statusCode).json(payload);
+    return res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+      error: error.message,
+      ...(error.details && { details: error.details }),
+    });
   }
 
   if (error.message && error.message.includes('CORS policy')) {
@@ -24,7 +27,7 @@ const errorHandler = (error, req, res, next) => {
     return res.status(400).json({
       success: false,
       error: 'File too large',
-      message: 'Maximum file size exceeded',
+      message: 'Maximum file size exceeded (limit 5MB)',
     });
   }
 
@@ -33,13 +36,24 @@ const errorHandler = (error, req, res, next) => {
     return res.status(400).json({
       success: false,
       error: 'Validation error',
+      message: errors[0] || 'Validation error',
       details: errors,
     });
   }
 
-  res.status(error.status || 500).json({
+  if (error.name === 'CastError') {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid ID format',
+      message: `Invalid ${error.path}: ${error.value}`,
+    });
+  }
+
+  const statusCode = error.statusCode || error.status || 500;
+  return res.status(statusCode).json({
     success: false,
-    error: config.isProduction ? 'Internal server error' : error.message,
+    message: config.isProduction ? 'Internal server error' : error.message || 'Internal server error',
+    error: config.isProduction ? 'Internal server error' : error.message || 'Internal server error',
     ...(!config.isProduction && { stack: error.stack }),
   });
 };

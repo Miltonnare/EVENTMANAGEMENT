@@ -1,140 +1,128 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Calendar, MapPin, Share2, Users, ArrowRight, Tag } from 'lucide-react';
 import SharingTools from './SharingTools';
 import EventImage from './EventImage';
 
 const EventCard = ({ event }) => {
   const [showSharing, setShowSharing] = useState(false);
-  const navigate = useNavigate();
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'TBD';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
-      year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric',
     });
   };
 
   const formatTime = (dateString) => {
+    if (!dateString) return 'TBD';
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
+  const attendeeCount = event.attendees ? event.attendees.length : (event.attendeeCount || 0);
+  const capacity = event.capacity;
+  const capacityPercent = capacity ? Math.min(100, Math.round((attendeeCount / capacity) * 100)) : null;
+
   return (
-    <div className="w-full max-w-sm mx-auto sm:max-w-none bg-gradient-to-br from-white via-violet-50/30 to-purple-50/30 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-violet-200/50 group hover:border-violet-300/70 transform hover:-translate-y-2 hover:scale-[1.02]">
-      {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-3 sm:p-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10 flex justify-between items-start">
-          <div className="flex-1 pr-2 sm:pr-4">
-            <h3 className="text-lg sm:text-xl font-black text-white leading-tight tracking-wide group-hover:text-violet-100 transition-colors duration-300 line-clamp-2">
-              {event.title}
-            </h3>
-          </div>
-          <button
-            onClick={() => setShowSharing(!showSharing)}
-            className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40 hover:scale-110 flex-shrink-0"
-            title="Share event"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      
-     
-      <div className="w-full h-48 sm:h-56 md:h-64 overflow-hidden bg-gray-100 rounded-t-2xl">
+    <div className="glass-panel glass-panel-hover rounded-3xl overflow-hidden flex flex-col justify-between border border-slate-800/80 group h-full relative">
+      {/* Poster Header */}
+      <div className="relative w-full h-52 overflow-hidden bg-slate-900">
         <EventImage
           event={event}
           alt={event.title}
           wrapperClassName="w-full h-full"
-          className="w-full h-full object-cover"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
         />
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
 
-      <div className="p-4 sm:p-6">
-       
-        <p className="text-gray-700 mb-4 sm:mb-6 line-clamp-3 text-sm sm:text-base leading-relaxed font-medium">
-          {event.description}
-        </p>
-        
-        {/* Date and Time Info */}
-        <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
-          {/* Date */}
-          <div className="flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-violet-100 to-purple-100 px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-violet-200/50 shadow-sm">
-            <div className="bg-gradient-to-br from-violet-500 to-purple-600 p-1.5 sm:p-2 rounded-lg shadow-md flex-shrink-0">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-violet-600 uppercase tracking-wider mb-1">Date</div>
-              <span className="text-xs sm:text-sm font-black text-gray-800 leading-tight block">{formatDate(event.date)}</span>
-            </div>
-          </div>
-          
-          {/* Time */}
-          <div className="flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-purple-100 to-indigo-100 px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-purple-200/50 shadow-sm">
-            <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-1.5 sm:p-2 rounded-lg shadow-md flex-shrink-0">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">Time</div>
-              <span className="text-xs sm:text-sm font-black text-gray-800 leading-tight block">{formatTime(event.date)}</span>
-            </div>
-          </div>
-        </div>
-        
-        {/* QR Code Section - Enhanced styling */}
-        {
-          event.qrCode && (
-            <div className='mt-4 flex flex-col items-center'>
-              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-gray-200/50">
-                <img 
-                  src={event.qrCode} 
-                  alt="Event QR Code - Scan to view details" 
-                  className='w-24 h-24 border-2 border-blue-200 sm:w-28 sm:h-28 object-contain'
-                />
-              </div>
-              <p className="text-xs text-gray-600 mt-2 text-center font-medium">
-                Scan to view event details
-              </p>
-            </div>
-          )
-        }
-        
-        {/* Action Buttons - Made responsive */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-0">
-          <Link
-            to={`/events/${event._id}`}
-            className="flex-1 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 text-center font-bold text-xs sm:text-sm tracking-wide shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
-          >
-            View Details
-          </Link>
+        {/* Floating Badges */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+          <span className="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-600/90 text-white backdrop-blur-md shadow-md shadow-indigo-600/30">
+            {event.tags?.[0] || 'Featured'}
+          </span>
           <button
-            onClick={() => navigate(`/events/${event._id}`)}
-            className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-violet-300 text-violet-700 bg-white/80 backdrop-blur-sm rounded-xl hover:bg-violet-50 hover:border-violet-400 hover:text-violet-800 transition-all duration-300 font-bold text-xs sm:text-sm tracking-wide shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+            onClick={() => setShowSharing(!showSharing)}
+            className="w-9 h-9 rounded-xl bg-slate-950/60 hover:bg-slate-900 border border-white/10 text-white/80 hover:text-white backdrop-blur-md flex items-center justify-center transition cursor-pointer"
+            title="Share event"
+            aria-label="Share Event"
           >
-            Register
+            <Share2 className="w-4 h-4" />
           </button>
         </div>
-      </div>
-      
-      {/* Sharing Section */}
-      {showSharing && (
-        <div className="border-t border-violet-200/50 bg-gradient-to-r from-violet-50/80 to-purple-50/80 backdrop-blur-sm p-3 sm:p-4">
-          <SharingTools eventTitle={event.title} />
+
+        {/* Date Overlay Badge */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-200">
+          <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+          <span>{formatDate(event.date)}</span>
         </div>
-      )}
+      </div>
+
+      {/* Body Content */}
+      <div className="p-5 flex flex-col flex-1 justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-bold text-slate-100 group-hover:text-indigo-400 transition line-clamp-2 leading-snug mb-2">
+            {event.title}
+          </h3>
+          <p className="text-slate-400 text-xs leading-relaxed line-clamp-2 mb-4">
+            {event.description}
+          </p>
+
+          {/* Details Row */}
+          <div className="flex flex-col gap-2 text-xs text-slate-300">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="truncate">{event.location}</span>
+            </div>
+            {capacityPercent !== null && (
+              <div className="flex flex-col gap-1 mt-1">
+                <div className="flex justify-between text-[11px] font-medium text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Users className="w-3 h-3 text-indigo-400" />
+                    Capacity
+                  </span>
+                  <span className="text-slate-300 font-bold">{attendeeCount} / {capacity}</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      capacityPercent >= 90
+                        ? 'bg-amber-500'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                    }`}
+                    style={{ width: `${capacityPercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
+          <Link
+            to={`/events/${event._id}`}
+            className="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 active:scale-95"
+          >
+            View Details
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* Share Tray */}
+        {showSharing && (
+          <div className="mt-2 pt-3 border-t border-slate-800 animate-fade-in">
+            <SharingTools eventTitle={event.title} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

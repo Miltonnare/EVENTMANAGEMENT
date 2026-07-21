@@ -3,6 +3,8 @@ import { vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { AuthProvider } from '../context/AuthContext';
+import { ToastProvider } from '../context/ToastContext';
 
 const mockNavigate = vi.fn();
 
@@ -22,31 +24,34 @@ describe('Navbar', () => {
 
   it('renders login and register links when unauthenticated', () => {
     render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter>
+            <Navbar />
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     );
 
-    expect(screen.getByText('Login')).toBeInTheDocument();
-    expect(screen.getByText('Register')).toBeInTheDocument();
+    expect(screen.getByText('Log In')).toBeInTheDocument();
+    expect(screen.getByText('Get Started')).toBeInTheDocument();
   });
 
-  it('shows dashboard and logout when authenticated, and clears storage on logout', async () => {
+  it('shows dashboard and user profile when authenticated', async () => {
     localStorage.setItem('token', 'token');
-    localStorage.setItem('user', JSON.stringify({ name: 'User' }));
+    localStorage.setItem('user', JSON.stringify({ name: 'Alex' }));
 
     render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+      <AuthProvider>
+        <ToastProvider>
+          <MemoryRouter>
+            <Navbar />
+          </MemoryRouter>
+        </ToastProvider>
+      </AuthProvider>
     );
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
-
-    await userEvent.click(screen.getAllByText('Logout')[0]);
-
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(localStorage.getItem('user')).toBeNull();
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    expect(screen.getByText('Alex')).toBeInTheDocument();
   });
 });

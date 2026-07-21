@@ -1,152 +1,199 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import EventCard from '../components/EventCard';
+import SkeletonLoader from '../components/SkeletonLoader';
+import EmptyState from '../components/EmptyState';
+import { useEvents } from '../hooks/useEvents';
+import { Search, Filter, Calendar, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+
+const CATEGORIES = [
+  { id: 'all', label: 'All Events' },
+  { id: 'Tech', label: 'Technology' },
+  { id: 'Music', label: 'Music & Festivals' },
+  { id: 'Business', label: 'Business & Networking' },
+  { id: 'Workshop', label: 'Workshops' },
+  { id: 'Sports', label: 'Sports & Fitness' },
+];
 
 const Events = () => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all'); // all, upcoming, past
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filterType, setFilterType] = useState('all'); // all, upcoming, past
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const config = {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        };
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        
-        const response = await axios.get(`${import.meta.env.VITE_API_EVENTS_URL}`, config);
-        const data = response?.data;
-        const list = Array.isArray(data?.events)
-          ? data.events
-          : Array.isArray(data)
-          ? data
-          : [];
-        setEvents(list);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const eventDate = new Date(event.date);
-    const now = new Date();
-    
-    let matchesFilter = true;
-    if (filter === 'upcoming') {
-      matchesFilter = eventDate > now;
-    } else if (filter === 'past') {
-      matchesFilter = eventDate < now;
-    }
-    
-    return matchesSearch && matchesFilter;
+  const { events, meta, loading, error, updateParams, refetch } = useEvents({
+    page: 1,
+    limit: 12,
+    search: '',
+    category: 'all',
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
-        <Navbar />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
-        </div>
-      </div>
-    );
-  }
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchTerm(val);
+    updateParams({ search: val, page: 1 });
+  };
+
+  const handleCategorySelect = (catId) => {
+    setSelectedCategory(catId);
+    updateParams({ category: catId, page: 1 });
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= meta.totalPages) {
+      updateParams({ page: newPage });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Client-side date filter (upcoming vs past)
+  const displayedEvents = events.filter((evt) => {
+    if (!evt.date) return true;
+    const evtDate = new Date(evt.date);
+    const now = new Date();
+    if (filterType === 'upcoming') return evtDate >= now;
+    if (filterType === 'past') return evtDate < now;
+    return true;
+  });
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       <Navbar />
-      
-      <main className="flex-grow py-8 px-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-800 via-purple-700 to-indigo-800 bg-clip-text text-transparent mb-4 drop-shadow-sm">
-              Discover Amazing Events
-            </h1>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-              Browse through our collection of events and find the perfect one for you
-            </p>
-          </div>
 
-          {/* Search and Filter Container */}
-          <div className="mb-8 bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-violet-100/50 hover:shadow-xl transition-all duration-300">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search events..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 border border-violet-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all duration-200 placeholder-gray-500 shadow-sm hover:shadow-md"
-                />
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-10 flex flex-col gap-8">
+        {/* Header Title */}
+        <div className="flex flex-col gap-3 text-center sm:text-left">
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            Explore Events & Experience Tech
+          </h1>
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl">
+            Filter upcoming meetups, conferences, workshops, and concerts near you or online.
+          </p>
+        </div>
+
+        {/* Search & Filter Toolbar */}
+        <div className="glass-panel p-5 rounded-3xl border border-slate-800 flex flex-col gap-4 shadow-2xl">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            {/* Search Input */}
+            <div className="relative w-full md:w-96">
+              <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search by title, location, or keyword..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:border-indigo-500 transition"
+              />
+            </div>
+
+            {/* Filter Dropdown & Reset */}
+            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+              <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-800 rounded-2xl px-3 py-2 text-sm text-slate-300">
+                <Filter className="w-4 h-4 text-indigo-400" />
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="bg-transparent text-slate-200 focus:outline-none cursor-pointer"
+                >
+                  <option value="all" className="bg-slate-900">All Timeline</option>
+                  <option value="upcoming" className="bg-slate-900">Upcoming Only</option>
+                  <option value="past" className="bg-slate-900">Past Events</option>
+                </select>
               </div>
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="px-4 py-3 border border-violet-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('all');
+                  setFilterType('all');
+                  updateParams({ search: '', category: 'all', page: 1 });
+                }}
+                className="p-3 rounded-2xl glass-panel hover:bg-slate-800 text-slate-400 hover:text-white transition"
+                title="Reset Filters"
               >
-                <option value="all">All Events</option>
-                <option value="upcoming">Upcoming Events</option>
-                <option value="past">Past Events</option>
-              </select>
+                <RefreshCw className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="mb-6 bg-white/50 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border border-violet-100/30 w-fit">
-            <p className="text-violet-700 font-medium">
-              Showing {filteredEvents.length} of {events.length} events
-            </p>
+          {/* Category Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-2 no-scrollbar border-t border-slate-800/80">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => handleCategorySelect(cat.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                  selectedCategory === cat.id
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
+                    : 'bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Events Grid */}
-          {filteredEvents.length === 0 ? (
-            <div className="text-center py-12 bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-violet-100/50">
-              <div className="text-6xl mb-4 filter drop-shadow-sm">🔍</div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                No events found
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {searchTerm ? 'Try adjusting your search terms' : 'Check back soon for new events'}
-              </p>
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white px-8 py-3 rounded-xl hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 font-medium"
-                >
-                  Clear Search
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredEvents.map(event => (
-                <div
-                  key={event._id}
-                  className="transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 filter drop-shadow-md hover:drop-shadow-xl"
-                >
-                  <EventCard event={event} />
-                </div>
+        {/* Content Area */}
+        {loading ? (
+          <SkeletonLoader count={6} type="card" />
+        ) : error ? (
+          <div className="glass-panel p-8 text-center rounded-3xl border border-red-500/20 text-red-300">
+            <p className="font-semibold mb-2">Failed to load events</p>
+            <p className="text-xs text-red-400 mb-4">{error}</p>
+            <button
+              onClick={refetch}
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : displayedEvents.length === 0 ? (
+          <EmptyState
+            type="search"
+            title="No events match your search"
+            description="Try adjusting your category filter, clearing search keywords, or selecting another timeline."
+            actionText="Clear Search"
+            onAction={() => {
+              setSearchTerm('');
+              setSelectedCategory('all');
+              setFilterType('all');
+              updateParams({ search: '', category: 'all', page: 1 });
+            }}
+          />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedEvents.map((event) => (
+                <EventCard key={event._id} event={event} />
               ))}
             </div>
-          )}
-        </div>
+
+            {/* Pagination controls */}
+            {meta.totalPages > 1 && (
+              <div className="flex items-center justify-between pt-6 border-t border-slate-800/80">
+                <span className="text-xs text-slate-400">
+                  Page <strong className="text-slate-200">{meta.page}</strong> of <strong className="text-slate-200">{meta.totalPages}</strong> ({meta.total} events)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={meta.page <= 1}
+                    onClick={() => handlePageChange(meta.page - 1)}
+                    className="p-2.5 rounded-xl glass-panel hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 transition"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    disabled={meta.page >= meta.totalPages}
+                    onClick={() => handlePageChange(meta.page + 1)}
+                    className="p-2.5 rounded-xl glass-panel hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 transition"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </main>
     </div>
   );

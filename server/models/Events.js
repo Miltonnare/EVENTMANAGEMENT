@@ -138,10 +138,9 @@ eventsSchema.pre('save', function(next) {
     next();
 });
 
-// Pre-remove middleware to clean up related data
-eventsSchema.pre('remove', async function(next) {
+// Pre-deleteOne middleware to clean up related data
+eventsSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
     try {
-      
         await mongoose.model('User').updateMany(
             { registeredEvents: this._id },
             { $pull: { registeredEvents: this._id } }

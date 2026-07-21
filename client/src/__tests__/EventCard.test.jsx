@@ -20,6 +20,9 @@ describe('EventCard', () => {
     title: 'Tech Summit',
     description: 'A great tech event',
     date: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
+    location: 'Nairobi',
+    capacity: 100,
+    attendees: ['user-1'],
     image: null,
     qrCode: 'data:image/png;base64,QR',
   };
@@ -28,7 +31,7 @@ describe('EventCard', () => {
     mockNavigate.mockClear();
   });
 
-  it('renders event details and toggles sharing tools', async () => {
+  it('renders event title and description', () => {
     render(
       <MemoryRouter>
         <EventCard event={event} />
@@ -37,23 +40,19 @@ describe('EventCard', () => {
 
     expect(screen.getByText('Tech Summit')).toBeInTheDocument();
     expect(screen.getByText('A great tech event')).toBeInTheDocument();
-
-    expect(screen.queryByText('Share This Event')).not.toBeInTheDocument();
-
-    await userEvent.click(screen.getByTitle('Share event'));
-
-    expect(screen.getByText('Share This Event')).toBeInTheDocument();
   });
 
-  it('navigates to details when register button is clicked', async () => {
+  it('toggles sharing tools when share icon is clicked', async () => {
     render(
       <MemoryRouter>
         <EventCard event={event} />
       </MemoryRouter>
     );
 
-    await userEvent.click(screen.getByText('Register'));
+    expect(screen.queryByText('Share This Event')).not.toBeInTheDocument();
 
-    expect(mockNavigate).toHaveBeenCalledWith('/events/event-1');
+    await userEvent.click(screen.getByTitle('Share event'));
+
+    expect(screen.getByText('Share This Event')).toBeInTheDocument();
   });
 });

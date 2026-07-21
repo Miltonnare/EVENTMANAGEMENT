@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import EventCard from './EventCard';
+import SkeletonLoader from './SkeletonLoader';
+import { Sparkles, ArrowRight, Calendar } from 'lucide-react';
 
 const FeaturedEvents = () => {
   const [events, setEvents] = useState([]);
@@ -14,16 +16,17 @@ const FeaturedEvents = () => {
         const data = response?.data;
         const allEvents = Array.isArray(data?.events)
           ? data.events
+          : Array.isArray(data?.data)
+          ? data.data
           : Array.isArray(data)
           ? data
           : [];
-        
-        // Filter for upcoming events and sort by date
+
         const upcomingEvents = allEvents
-          .filter(event => new Date(event.date) > new Date())
+          .filter((event) => new Date(event.date) > new Date())
           .sort((a, b) => new Date(a.date) - new Date(b.date))
-          .slice(0, 6); // Show only 6 featured events
-        
+          .slice(0, 6);
+
         setEvents(upcomingEvents);
       } catch (error) {
         console.error('Error fetching featured events:', error);
@@ -35,107 +38,58 @@ const FeaturedEvents = () => {
     fetchFeaturedEvents();
   }, []);
 
-  if (loading) {
-    return (
-      <section className="py-20 px-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-200/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl md:text-6xl font-black text-transparent bg-gradient-to-r from-slate-700 via-blue-600 to-indigo-700 bg-clip-text mb-6 tracking-tight leading-tight">
-              Featured Upcoming Events
-            </h2>
-            <p className="text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto font-medium leading-relaxed">
-              Discover the most exciting events happening soon
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 shadow-lg"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-200/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-sky-200/25 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
-      
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Header Section */}
-        <div className="text-center mb-16">
-          <div className="inline-block mb-4 px-6 py-2 bg-white/70 backdrop-blur-sm rounded-full border border-blue-200/50 shadow-sm">
-            <span className="text-sm font-bold text-blue-600 uppercase tracking-widest">Featured Events</span>
-          </div>
-          <h2 className="text-5xl md:text-6xl font-black text-transparent bg-gradient-to-r from-slate-700 via-blue-600 to-indigo-700 bg-clip-text mb-6 tracking-tight leading-tight">
-            Upcoming Events
-          </h2>
-          <p className="text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto font-medium leading-relaxed">
-            Discover the most exciting events happening soon. Don't miss out on these amazing opportunities!
-          </p>
+    <section className="py-12 px-4 sm:px-8 w-full flex flex-col gap-10">
+      <div className="text-center flex flex-col items-center gap-3">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+          <Sparkles className="w-3.5 h-3.5" />
+          Featured Highlights
         </div>
+        <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          Upcoming Events
+        </h2>
+        <p className="text-slate-400 text-sm sm:text-base max-w-xl">
+          Discover handpicked tech meetups, workshops, and high-impact conferences happening soon.
+        </p>
+      </div>
 
-        {events.length === 0 ? (
-          <div className="text-center py-16 bg-white/80 backdrop-blur-sm rounded-3xl border border-blue-200/50 shadow-xl">
-            <div className="text-8xl mb-6 filter drop-shadow-lg">📅</div>
-            <h3 className="text-3xl font-black text-slate-800 mb-4 tracking-wide">
-              No Upcoming Events
-            </h3>
-            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
-              Check back soon for exciting new events, or be the first to create one!
-            </p>
-            <Link 
-              to="/register" 
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white px-10 py-4 rounded-xl hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-white font-bold text-lg"
+      {loading ? (
+        <SkeletonLoader count={3} type="card" />
+      ) : events.length === 0 ? (
+        <div className="glass-panel p-12 text-center rounded-3xl border border-slate-800 flex flex-col items-center justify-center gap-4 max-w-md mx-auto">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <Calendar className="w-7 h-7" />
+          </div>
+          <h3 className="text-xl font-bold text-white">No Upcoming Events</h3>
+          <p className="text-slate-400 text-xs leading-relaxed">
+            Check back soon for new event announcements or host your own!
+          </p>
+          <Link
+            to="/register"
+            className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/20"
+          >
+            Create an Event
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <EventCard key={event._id} event={event} />
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              to="/events"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl glass-panel hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-sm transition transform active:scale-95 shadow-xl"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Create Your First Event
+              <span>View All Events</span>
+              <ArrowRight className="w-4 h-4 text-indigo-400" />
             </Link>
           </div>
-        ) : (
-          <>
-            {/* Events Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-              {events.map(event => (
-                <div 
-                  key={event._id} 
-                  className="group transform transition-all duration-500 hover:scale-105 hover:-translate-y-2 filter drop-shadow-md hover:drop-shadow-xl"
-                >
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-2 border border-blue-200/50 hover:border-blue-300/60 transition-all duration-300 shadow-sm hover:shadow-lg">
-                    <EventCard event={event} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* View All Events Button */}
-            <div className="text-center">
-              <div className="inline-block bg-white/80 backdrop-blur-sm rounded-2xl p-2 border border-blue-200/50 shadow-lg">
-                <Link 
-                  to="/events" 
-                  className="inline-flex items-center gap-4 bg-gradient-to-r from-white to-blue-50 text-blue-700 px-10 py-4 rounded-xl hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-white font-black text-lg tracking-wide group"
-                >
-                  <span>View All Events</span>
-                  <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 };

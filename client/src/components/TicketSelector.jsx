@@ -31,7 +31,8 @@ const TicketSelector = ({ ticketTypes, onPurchase, loading }) => {
 
       <div className="grid gap-3">
         {ticketTypes.map((tier) => {
-          const disabled = tier.status !== 'active';
+          const tierStatus = tier.status || (tier.isActive !== false ? 'active' : 'inactive');
+          const disabled = tierStatus !== 'active';
           const isSelected = selectedId === tier._id;
 
           return (
@@ -56,9 +57,9 @@ const TicketSelector = ({ ticketTypes, onPurchase, loading }) => {
                   </p>
                 </div>
                 <span
-                  className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadgeClass(tier.status)}`}
+                  className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadgeClass(tierStatus)}`}
                 >
-                  {tier.status.replace('_', ' ')}
+                  {tierStatus.replace('_', ' ')}
                 </span>
               </div>
 

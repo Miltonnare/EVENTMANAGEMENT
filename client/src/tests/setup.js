@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 process.env.VITE_API_EVENTS_URL = 'http://localhost/api/events';
 process.env.VITE_API_AUTH_URL = 'http://localhost/api/auth';

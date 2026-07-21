@@ -1,57 +1,52 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { getAuthHeaders } from "../utils/auth";
-import AttendeeDashboard from "../components/AttendeeDashboard";
-import OrganizerDashboard from "../components/OrganizerDashboard";
-import Navbar from "../components/Navbar";
+import React from 'react';
+import { useAuth } from '../hooks/useAuth';
+import AttendeeDashboard from '../components/AttendeeDashboard';
+import OrganizerDashboard from '../components/OrganizerDashboard';
+import SkeletonLoader from '../components/SkeletonLoader';
+import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    window.location.href = "/login";
-                    return;
-                }
-
-                const config = {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                };
-                
-                const res = await axios.get(`${import.meta.env.VITE_API_AUTH_URL}/profile`, config);
-                setUser(res.data);
-            } catch (error) {
-                console.error("Error fetching user:", error);
-                window.location.href = "/login";
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUser();
-    }, []);
-
-    if (loading) return <p className="text-center mt-6">Loading Dashboard...</p>;
-
+  if (loading) {
     return (
-        <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-grow p-6">
-                <h1 className="text-3xl font-bold mb-6">Welcome, {user?.name}</h1>
-                {user?.role === "organizer" ? (
-                    <OrganizerDashboard user={user} />
-                ) : (
-                    <AttendeeDashboard user={user} />
-                )}
-            </main>
-        </div>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+        <Navbar />
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-8">
+          <SkeletonLoader count={3} type="card" />
+        </main>
+      </div>
     );
+  }
+
+  const isOrganizer = user?.role === 'organizer' || user?.role === 'admin';
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      <Navbar />
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 flex flex-col gap-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl border border-slate-800">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">
+              Welcome, {user?.name || 'User'}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400">
+              {isOrganizer ? 'Organizer Portal & Management Hub' : 'Attendee Ticket Wallet & Registered Events'}
+            </p>
+          </div>
+          <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 w-fit">
+            Role: {user?.role || 'Attendee'}
+          </span>
+        </div>
+
+        {isOrganizer ? (
+          <OrganizerDashboard user={user} />
+        ) : (
+          <AttendeeDashboard user={user} />
+        )}
+      </main>
+    </div>
+  );
 };
 
 export default Dashboard;

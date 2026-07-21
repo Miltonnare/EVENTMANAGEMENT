@@ -19,7 +19,7 @@ describe('Auth middleware', () => {
     await protect(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Not Authorized, no token' });
+    expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Not Authorized, no token' });
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -31,7 +31,7 @@ describe('Auth middleware', () => {
     await protect(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Not authorized,token failed' });
+    expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Not authorized,token failed' });
     expect(next).not.toHaveBeenCalled();
   });
 

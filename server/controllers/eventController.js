@@ -44,10 +44,10 @@ const createEvent = asyncHandler(async (req, res) => {
 
 const getEvents = asyncHandler(async (req, res) => {
   try {
-    const events = await eventService.getEvents();
-    return sendSuccess(res, 200, { events });
+    const result = await eventService.getEvents(req.query);
+    return sendSuccess(res, 200, { events: result.events, meta: result.meta });
   } catch (error) {
-    return res.status(500).json({ success: false, Error: error.message });
+    return handleEventError(res, error);
   }
 });
 

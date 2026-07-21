@@ -67,7 +67,50 @@ const createEvent = async (body, file, organizerId) => {
   return newEvent;
 };
 
-const getEvents = async () => Events.find().populate('organizer', 'name email');
+const getEvents = async (queryParams = {}) => {
+  const { page = 1, limit = 20, search, category, status, sortBy = 'date', sortOrder = 'asc' } = queryParams;
+  const filter = {};
+
+  if (status) {
+    filter.status = status;
+  }
+  if (category && category !== 'all') {
+    filter.tags = { $in: [category] };
+  }
+  if (search) {
+    filter.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } },
+      { location: { $regex: search, $options: 'i' } },
+    ];
+  }
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10) || 20));
+  const skip = (pageNum - 1) * limitNum;
+  const sortDirection = sortOrder === 'desc' ? -1 : 1;
+  const sortObj = { [sortBy]: sortDirection };
+
+  const [events, total] = await Promise.all([
+    Events.find(filter)
+      .populate('organizer', 'name email')
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limitNum)
+      .lean({ virtuals: true }),
+    Events.countDocuments(filter),
+  ]);
+
+  return {
+    events,
+    meta: {
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum) || 1,
+    },
+  };
+};
 
 const getEventById = async (id) => {
   const event = await Events.findById(id).populate('organizer', 'name email');
@@ -76,13 +119,16 @@ const getEventById = async (id) => {
   }
 
   const ticketTypes = await ticketTypeService.listTicketTypes(id);
-  const eventObj = event.toObject();
+  const eventObj = event.toObject({ virtuals: true });
   eventObj.ticketTypes = ticketTypes;
   return eventObj;
 };
 
 const getMyEvents = async (organizerId) =>
-  Events.find({ organizer: organizerId });
+  Events.find({ organizer: organizerId })
+    .populate('organizer', 'name email')
+    .sort({ createdAt: -1 })
+    .lean({ virtuals: true });
 
 const getRegisteredEvents = async (userId) =>
   ticketService.getRegisteredEventsForUser(userId);
